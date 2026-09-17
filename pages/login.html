@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta name="robots" content="noindex, nofollow">
+
+  <title>Login Administrativo | SmartDeals</title>
+
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+
+<body class="login-page">
+
+  <main class="login-container">
+
+    <section class="login-card">
+      <div class="login-logo">
+        <h1>SmartDeals</h1>
+        <p>Acesso administrativo</p>
+      </div>
+
+      <form id="form-login">
+        <label>
+          E-mail
+          <input
+            id="email"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder="seu@email.com"
+          >
+        </label>
+
+        <label>
+          Senha
+          <input
+            id="senha"
+            type="password"
+            required
+            autocomplete="current-password"
+            placeholder="Digite sua senha"
+          >
+        </label>
+
+        <button type="submit">
+          Entrar no painel
+        </button>
+
+        <p id="mensagem-login" hidden></p>
+      </form>
+
+      <a class="voltar-site" href="../index.html">
+        Voltar ao SmartDeals
+      </a>
+    </section>
+
+  </main>
+
+  <script type="module" src="../assets/js/auth.js"></script>
+
+</body>
+</html>

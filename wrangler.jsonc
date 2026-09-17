@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "smartdeals-importador",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-05",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "browser": {
+    "binding": "BROWSER",
+    "remote": true
+  }
+}

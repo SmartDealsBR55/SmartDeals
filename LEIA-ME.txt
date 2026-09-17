@@ -1,0 +1,47 @@
+SMARTDEALS IMPORTADOR V2
+==========================
+
+Esta versão usa dois métodos:
+
+1. fetch normal, que é mais rápido;
+2. Cloudflare Browser Run, que abre a página em um navegador real quando
+   a loja carrega os dados por JavaScript.
+
+COMO INSTALAR
+-------------
+
+1. Substitua a pasta importador-worker do projeto por esta pasta.
+
+2. Abra o terminal dentro de importador-worker:
+
+   npm.cmd install
+
+3. Publique:
+
+   npm.cmd run deploy
+
+4. A URL deve continuar parecida com:
+
+   https://smartdeals-importador.gabriel-d-blaut.workers.dev
+
+5. No admin.js, mantenha:
+
+   const URL_IMPORTADOR_PRODUTOS =
+     "https://smartdeals-importador.gabriel-d-blaut.workers.dev";
+
+TESTE
+-----
+
+Abra a URL do Worker no navegador. Deve aparecer:
+
+  "servico": "SmartDeals Importador v2"
+  "browserRun": true
+
+Depois teste um link pelo painel administrativo.
+
+OBSERVAÇÃO
+----------
+
+Nenhum importador por leitura automática consegue garantir 100% dos dados
+em todas as lojas. Algumas lojas bloqueiam robôs, exigem login ou mudam o
+HTML. O painel continuará permitindo completar manualmente o que faltar.

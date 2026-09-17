@@ -1,0 +1,37 @@
+IMPORTADOR AUTOMÁTICO DE PRODUTOS
+
+1. Abra o VS Code na pasta SmartDeals.
+2. No terminal, entre na pasta:
+
+   cd importador-worker
+
+3. Instale as dependências:
+
+   npm.cmd install
+
+4. Entre na Cloudflare:
+
+   npx.cmd wrangler login
+
+5. Publique o Worker:
+
+   npm.cmd run deploy
+
+6. Copie a URL exibida no terminal.
+
+7. Abra assets/js/admin.js e procure:
+
+   const URL_IMPORTADOR_PRODUTOS =
+     "COLE_AQUI_A_URL_DO_WORKER";
+
+8. Cole a URL entre as aspas e salve.
+
+9. Volte para a pasta principal:
+
+   cd ..
+
+10. Inicie o SmartDeals:
+
+   npm.cmd run dev
+
+Agora, no painel administrativo, cole o link de afiliado e clique em "Buscar informações".

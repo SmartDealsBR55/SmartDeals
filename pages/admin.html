@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="robots"
+    content="noindex, nofollow"
+  >
+
+  <title>Painel Administrativo | SmartDeals</title>
+
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+
+<body>
+
+  <header class="admin-header">
+    <div>
+      <h1>SmartDeals Admin</h1>
+      <p>Cadastro e gerenciamento de produtos</p>
+    </div>
+
+    <a href="../index.html">
+      Voltar ao site
+    </a>
+  </header>
+
+  <main class="admin-container">
+
+    <section class="admin-card">
+
+      <div class="admin-card-heading">
+        <div>
+          <h2 id="titulo-formulario">
+            Novo produto
+          </h2>
+
+          <p id="descricao-formulario">
+            Cadastre uma nova oferta no SmartDeals.
+          </p>
+        </div>
+
+        <span
+          id="indicador-edicao"
+          hidden
+        >
+          Modo de edição
+        </span>
+      </div>
+
+      <form id="form-produto">
+
+        <input
+          id="produto-id"
+          type="hidden"
+          value=""
+        >
+
+        <section class="importador-produto" aria-labelledby="titulo-importador">
+          <div class="importador-produto-cabecalho">
+            <div>
+              <h3 id="titulo-importador">Preencher pelo link</h3>
+              <p>
+                Cole o link de afiliado. O sistema tenta buscar nome, loja,
+                preços, imagens, avaliação e parcelamento. Você completa
+                manualmente o que faltar.
+              </p>
+            </div>
+
+            <span class="importador-badge">Automático</span>
+          </div>
+
+          <div class="importador-produto-acoes">
+            <label class="campo-link-importador">
+              Link de afiliado
+
+              <input
+                id="link"
+                type="url"
+                required
+                placeholder="https://..."
+              >
+            </label>
+
+            <button
+              id="botao-buscar-informacoes"
+              type="button"
+            >
+              Buscar informações
+            </button>
+          </div>
+
+          <div
+            id="resultado-importacao"
+            class="resultado-importacao"
+            hidden
+          ></div>
+        </section>
+
+        <div class="form-grid">
+
+          <label>
+            Nome do produto
+
+            <input
+              id="nome"
+              type="text"
+              required
+              placeholder="Ex.: Fone Bluetooth"
+            >
+          </label>
+
+          <label>
+            Loja
+
+            <select id="loja" required>
+              <option value="">Selecione</option>
+              <option value="Amazon">Amazon</option>
+              <option value="Shopee">Shopee</option>
+              <option value="Mercado Livre">
+                Mercado Livre
+              </option>
+              <option value="Temu">Temu</option>
+              <option value="AliExpress">
+                AliExpress
+              </option>
+              <option value="Magazine Luiza">
+                Magazine Luiza
+              </option>
+            </select>
+          </label>
+
+          <label>
+            Categoria
+
+            <select id="categoria" required>
+              <option value="">Selecione</option>
+              <option value="Eletrônicos">Eletrônicos</option>
+              <option value="Informática">Informática</option>
+              <option value="Games">Games</option>
+              <option value="Moda">Moda</option>
+              <option value="Beleza">Beleza</option>
+              <option value="Casa & Cozinha">Casa & Cozinha</option>
+              <option value="Esportes">Esportes</option>
+              <option value="Bebê & Infantil">Bebê & Infantil</option>
+              <option value="Pets">Pets</option>
+              <option value="Automotivo">Automotivo</option>
+              <option value="Ferramentas">Ferramentas</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </label>
+
+          <label>
+            Preço antigo
+
+            <input
+              id="preco-antigo"
+              class="campo-moeda"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="R$ 0,00"
+            >
+          </label>
+
+          <label>
+            Preço atual
+
+            <input
+              id="preco-atual"
+              class="campo-moeda"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              required
+              placeholder="R$ 0,00"
+            >
+          </label>
+
+          <label>
+            Parcelamento
+
+            <input
+              id="parcelas"
+              type="text"
+              placeholder="Ex.: 6x de R$ 29,98"
+            >
+          </label>
+
+          <label>
+            Avaliação
+
+            <input
+              id="avaliacao"
+              type="text"
+              inputmode="decimal"
+              placeholder="Ex.: 4,8"
+            >
+          </label>
+
+          <label>
+            Economia
+
+            <select id="economia">
+              <option value="">
+                Sem informação
+              </option>
+              <option value="5%">5%</option>
+              <option value="10%">10%</option>
+              <option value="15%">15%</option>
+              <option value="20%">20%</option>
+              <option value="25%">25%</option>
+              <option value="30%">30%</option>
+              <option value="35%">35%</option>
+              <option value="40%">40%</option>
+              <option value="45%">45%</option>
+              <option value="50%">50%</option>
+              <option value="55%">55%</option>
+              <option value="60%">60%</option>
+              <option value="65%">65%</option>
+              <option value="70%">70%</option>
+              <option value="75%">75%</option>
+              <option value="80%">80%</option>
+              <option value="85%">85%</option>
+              <option value="90%">90%</option>
+              <option value="95%">95%</option>
+            </select>
+          </label>
+
+          <label>
+            SmartScore
+
+            <input
+              id="score"
+              type="text"
+              inputmode="decimal"
+              placeholder="Ex.: 9,3"
+            >
+          </label>
+
+          <label>
+            Selo
+
+            <select id="badge">
+              <option value="">
+                Sem selo
+              </option>
+              <option value="Oferta Relâmpago">
+                Oferta Relâmpago
+              </option>
+              <option value="Mais vendido">
+                Mais vendido
+              </option>
+              <option value="Melhor preço">
+                Melhor preço
+              </option>
+              <option value="Super oferta">
+                Super oferta
+              </option>
+              <option value="Destaque">
+                Destaque
+              </option>
+              <option value="Novidade">
+                Novidade
+              </option>
+              <option value="Últimas unidades">
+                Últimas unidades
+              </option>
+              <option value="Frete grátis">
+                Frete grátis
+              </option>
+              <option value="Escolha SmartDeals">
+                Escolha SmartDeals
+              </option>
+            </select>
+          </label>
+
+          <label class="campo-completo">
+            Imagens do produto
+
+            <textarea
+              id="imagens"
+              rows="6"
+              required
+              placeholder="Cole uma imagem por linha:
+
+https://site.com/foto1.jpg
+https://site.com/foto2.jpg
+https://site.com/foto3.jpg"
+            ></textarea>
+
+            <small>
+              Coloque uma URL de imagem em cada linha.
+              A primeira será usada como imagem principal.
+            </small>
+          </label>
+
+        </div>
+
+        <p
+          id="mensagem-formulario"
+          class="mensagem-formulario"
+          hidden
+        ></p>
+
+        <div class="acoes-formulario">
+
+          <button
+            id="botao-publicar"
+            type="submit"
+          >
+            Publicar produto
+          </button>
+
+          <button
+            id="botao-cancelar-edicao"
+            type="button"
+            hidden
+          >
+            Cancelar edição
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <section class="admin-card">
+
+      <div class="products-header">
+
+        <div>
+          <h2>Produtos cadastrados</h2>
+
+          <p id="contador-produtos">
+            0 produtos
+          </p>
+        </div>
+
+        <div class="admin-category-tools">
+          <button
+            id="botao-reclassificar-produtos"
+            type="button"
+            class="botao-secundario"
+            title="Analisa o nome de todos os produtos e corrige a categoria salva no Firebase"
+          >
+            Reclassificar categorias
+          </button>
+
+          <button
+            id="botao-atualizar-produtos"
+            type="button"
+            class="botao-secundario"
+          >
+            Atualizar lista
+          </button>
+        </div>
+
+      </div>
+
+      <div id="lista-produtos">
+
+        <p class="lista-vazia">
+          Nenhum produto cadastrado.
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script
+    type="module"
+    src="../assets/js/admin.js"
+  ></script>
+
+</body>
+</html>

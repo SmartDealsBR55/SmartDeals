@@ -1,0 +1,7 @@
+SmartDeals Desktop v7 - Classificação refinada
+
+- Beleza agora prioriza: óleo capilar, óleo de cabelo, reparador de pontas, sérum capilar, leave-in, shampoo, condicionador, máscara/tratamento capilar e Pantene.
+- Moda agora prioriza: meia, meias, soquete, meia soquete e kit de meias.
+- Mantida a ordem de prioridade: categorias específicas são avaliadas antes de Casa & Cozinha.
+- O botão Reclassificar categorias do painel pode ser executado novamente para corrigir produtos já cadastrados no Firestore.
+- Nenhum produto precisa ser apagado ou republicado.

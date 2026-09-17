@@ -1,0 +1,1247 @@
+import { db, auth } from "./firebase.js";
+
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc
+} from "firebase/firestore";
+
+import {
+  onAuthStateChanged
+} from "firebase/auth";
+
+/* =========================
+   ELEMENTOS DA PÁGINA
+========================= */
+
+const formulario = document.querySelector("#form-produto");
+const listaProdutos = document.querySelector("#lista-produtos");
+const contadorProdutos = document.querySelector("#contador-produtos");
+
+const produtoId = document.querySelector("#produto-id");
+
+const tituloFormulario = document.querySelector(
+  "#titulo-formulario"
+);
+
+const descricaoFormulario = document.querySelector(
+  "#descricao-formulario"
+);
+
+const indicadorEdicao = document.querySelector(
+  "#indicador-edicao"
+);
+
+const mensagemFormulario = document.querySelector(
+  "#mensagem-formulario"
+);
+
+const botaoPublicar = document.querySelector(
+  "#botao-publicar"
+);
+
+const botaoCancelarEdicao = document.querySelector(
+  "#botao-cancelar-edicao"
+);
+
+const botaoAtualizarProdutos = document.querySelector(
+  "#botao-atualizar-produtos"
+);
+
+const botaoReclassificarProdutos = document.querySelector(
+  "#botao-reclassificar-produtos"
+);
+
+const campoPrecoAntigo = document.querySelector(
+  "#preco-antigo"
+);
+
+const campoPrecoAtual = document.querySelector(
+  "#preco-atual"
+);
+
+const botaoBuscarInformacoes = document.querySelector(
+  "#botao-buscar-informacoes"
+);
+
+const resultadoImportacao = document.querySelector(
+  "#resultado-importacao"
+);
+
+/*
+ * Depois de publicar o Cloudflare Worker, cole a URL aqui.
+ * Exemplo: https://smartdeals-importador.seuusuario.workers.dev
+ */
+const URL_IMPORTADOR_PRODUTOS =
+  "https://smartdeals-importador.gabriel-d-blaut.workers.dev";
+
+let produtos = [];
+let produtoEmEdicao = null;
+
+/* =========================
+   AUTENTICAÇÃO
+========================= */
+
+onAuthStateChanged(auth, (usuario) => {
+  if (!usuario) {
+    window.location.href = "/pages/login.html";
+    return;
+  }
+
+  carregarProdutos();
+});
+
+/* =========================
+   FUNÇÕES GERAIS
+========================= */
+
+function obterElemento(seletor) {
+  return document.querySelector(seletor);
+}
+
+function obterValor(seletor) {
+  const elemento = obterElemento(seletor);
+
+  if (!elemento) {
+    return "";
+  }
+
+  return elemento.value.trim();
+}
+
+function definirValor(seletor, valor) {
+  const elemento = obterElemento(seletor);
+
+  if (!elemento) {
+    return;
+  }
+
+  elemento.value = valor ?? "";
+}
+
+function escaparHtml(valor) {
+  return String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function mostrarMensagem(texto, tipo = "erro") {
+  if (!mensagemFormulario) {
+    alert(texto);
+    return;
+  }
+
+  mensagemFormulario.hidden = false;
+  mensagemFormulario.textContent = texto;
+
+  mensagemFormulario.classList.remove(
+    "sucesso",
+    "erro"
+  );
+
+  mensagemFormulario.classList.add(tipo);
+}
+
+function esconderMensagem() {
+  if (!mensagemFormulario) {
+    return;
+  }
+
+  mensagemFormulario.hidden = true;
+  mensagemFormulario.textContent = "";
+
+  mensagemFormulario.classList.remove(
+    "sucesso",
+    "erro"
+  );
+}
+
+function mostrarResultadoImportacao(texto, tipo = "aviso") {
+  if (!resultadoImportacao) {
+    return;
+  }
+
+  resultadoImportacao.hidden = false;
+  resultadoImportacao.textContent = texto;
+  resultadoImportacao.classList.remove(
+    "sucesso",
+    "aviso",
+    "erro"
+  );
+  resultadoImportacao.classList.add(tipo);
+}
+
+function esconderResultadoImportacao() {
+  if (!resultadoImportacao) {
+    return;
+  }
+
+  resultadoImportacao.hidden = true;
+  resultadoImportacao.textContent = "";
+  resultadoImportacao.classList.remove(
+    "sucesso",
+    "aviso",
+    "erro"
+  );
+}
+
+/* =========================
+   FORMATAÇÃO DE MOEDA
+========================= */
+
+function formatarMoedaPorDigitos(valor) {
+  const apenasNumeros = String(valor ?? "")
+    .replace(/\D/g, "");
+
+  if (!apenasNumeros) {
+    return "";
+  }
+
+  const numero = Number(apenasNumeros) / 100;
+
+  return numero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+}
+
+function converterMoedaParaNumero(valor) {
+  const texto = String(valor ?? "")
+    .replace(/\s/g, "")
+    .replace("R$", "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+
+  const numero = Number(texto);
+
+  return Number.isFinite(numero) ? numero : 0;
+}
+
+function formatarMoedaExistente(valor) {
+  const texto = String(valor ?? "").trim();
+
+  if (!texto) {
+    return "";
+  }
+
+  if (texto.includes("R$")) {
+    const numero = converterMoedaParaNumero(texto);
+
+    return numero.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+  }
+
+  /*
+   * Compatibilidade com produtos antigos:
+   * "179,90" vira "R$ 179,90"
+   * "1.299,90" vira "R$ 1.299,90"
+   */
+  if (texto.includes(",") || texto.includes(".")) {
+    let numero;
+
+    if (texto.includes(",")) {
+      numero = Number(
+        texto
+          .replace(/\./g, "")
+          .replace(",", ".")
+      );
+    } else {
+      numero = Number(texto);
+    }
+
+    if (Number.isFinite(numero)) {
+      return numero.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+  }
+
+  return formatarMoedaPorDigitos(texto);
+}
+
+function aplicarMascaraMoeda(campo) {
+  if (!campo) {
+    return;
+  }
+
+  campo.addEventListener("input", () => {
+    campo.value = formatarMoedaPorDigitos(
+      campo.value
+    );
+  });
+
+  campo.addEventListener("blur", () => {
+    if (campo.value) {
+      campo.value = formatarMoedaExistente(
+        campo.value
+      );
+    }
+  });
+}
+
+aplicarMascaraMoeda(campoPrecoAntigo);
+aplicarMascaraMoeda(campoPrecoAtual);
+
+/* =========================
+   SELECTS E COMPATIBILIDADE
+========================= */
+
+function selecionarOpcao(seletor, valor) {
+  const select = obterElemento(seletor);
+  const texto = String(valor ?? "").trim();
+
+  if (!select) {
+    return;
+  }
+
+  if (!texto) {
+    select.value = "";
+    return;
+  }
+
+  const opcaoExistente = Array.from(
+    select.options
+  ).find((opcao) => opcao.value === texto);
+
+  if (!opcaoExistente) {
+    const novaOpcao = document.createElement("option");
+
+    novaOpcao.value = texto;
+    novaOpcao.textContent = texto;
+    select.appendChild(novaOpcao);
+  }
+
+  select.value = texto;
+}
+
+/* =========================
+   IMPORTAÇÃO PELO LINK
+========================= */
+
+function normalizarTextoCategoria(valor) {
+  return String(valor ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+const REGRAS_CATEGORIA_ADMIN = [
+  ["Bebê & Infantil", [
+    "bebe", "berco", "bercinho", "mosquiteiro", "mamadeira", "chupeta",
+    "fralda", "carrinho de bebe", "cadeira de bebe", "banheira bebe",
+    "maternidade", "infantil", "crianca"
+  ]],
+  ["Beleza", [
+    "maquiagem", "batom", "base facial", "rimel", "mascara de cilios",
+    "perfume", "hidratante", "skincare", "creme facial", "oleo capilar",
+    "oleo de cabelo", "shampoo", "condicionador", "secador", "chapinha",
+    "barbeador", "depilador", "unha", "esmalte", "cabelo"
+  ]],
+  ["Moda", [
+    "calcinha", "lingerie", "sutia", "biquini", "maio", "cueca",
+      "meia", "meias", "soquete", "meia soquete", "kit de meias", "short",
+    "shorts", "bermuda", "calca", "jeans", "legging", "vestido", "saia",
+    "camisa", "camiseta", "blusa", "pijama", "tenis", "chinelo", "sandalia",
+    "sapato", "bolsa", "mochila", "carteira", "oculos", "relogio", "anel",
+    "alianca", "colar", "pulseira", "moda feminina", "moda masculina", "roupa"
+  ]],
+  ["Games", [
+    "playstation", "ps4", "ps5", "xbox", "nintendo", "switch", "controle gamer",
+    "joystick", "gamepad", "gamer", "console", "headset gamer"
+  ]],
+  ["Informática", [
+    "notebook", "laptop", "computador", "pc gamer", "monitor", "teclado", "mouse",
+    "webcam", "ssd", "hd externo", "pendrive", "roteador", "impressora",
+    "memoria ram", "placa de video", "gabinete", "hub usb", "adaptador usb"
+  ]],
+  ["Eletrônicos", [
+    "celular", "smartphone", "fone", "bluetooth", "carregador", "power bank",
+    "caixa de som", "smartwatch", "tablet", "camera", "microfone", "televisao",
+    "projetor", "cabo usb", "lightning", "tipo-c", "type-c"
+  ]],
+  ["Esportes", [
+    "halter", "musculacao", "bicicleta", "bike", "bola de futebol", "volei",
+    "basquete", "yoga", "equipamento fitness", "equipamento academia"
+  ]],
+  ["Pets", [
+    "pet", "cachorro", "gato", "racao", "coleira", "arranhador", "comedouro",
+    "bebedouro pet", "areia gato", "casinha pet", "brinquedo pet"
+  ]],
+  ["Automotivo", [
+    "automotivo", "veiculo", "motocicleta", "pneu", "volante", "farol",
+    "lampada automotiva", "tapete carro", "suporte veicular", "compressor de pneu"
+  ]],
+  ["Ferramentas", [
+    "furadeira", "parafusadeira", "chave catraca", "jogo de chave", "alicate",
+    "martelo", "serra", "broca", "ferramenta", "multimetro", "soprador",
+    "esmerilhadeira"
+  ]],
+  ["Casa & Cozinha", [
+    "cozinha", "panela", "frigideira", "omeleteira", "chaleira", "torneira",
+    "ralador", "fatiador", "cortador", "pote", "marmita", "lixeira", "escorredor",
+    "organizador", "prateleira", "cama", "travesseiro", "lencol", "toalha",
+    "tapete", "papel de parede", "decoracao", "decoracoes", "decorativo",
+    "vaso", "vasos", "vasilha", "vasilhas", "utensilio", "utensilios",
+    "casa e construcao", "casa & construcao", "porta retrato", "porta chaves",
+    "ventilador", "luminaria", "sanduicheira", "mixer", "liquidificador",
+    "cafeteira", "air fryer", "aspirador", "cabide"
+  ]]
+];
+
+function categoriaInteligentePorTexto(valor, categoriaAtual = "") {
+  const texto = normalizarTextoCategoria(valor);
+
+  for (const [categoria, termos] of REGRAS_CATEGORIA_ADMIN) {
+    if (termos.some((termo) => texto.includes(normalizarTextoCategoria(termo)))) {
+      return categoria;
+    }
+  }
+
+  const original = normalizarTextoCategoria(categoriaAtual);
+  const aliases = {
+    casa: "Casa & Cozinha",
+    "casa e cozinha": "Casa & Cozinha",
+    "casa & cozinha": "Casa & Cozinha",
+    eletronicos: "Eletrônicos",
+    informatica: "Informática",
+    game: "Games",
+    games: "Games",
+    moda: "Moda",
+    beleza: "Beleza",
+    esporte: "Esportes",
+    esportes: "Esportes",
+    pet: "Pets",
+    pets: "Pets",
+    automotivo: "Automotivo",
+    ferramenta: "Ferramentas",
+    ferramentas: "Ferramentas",
+    bebe: "Bebê & Infantil",
+    infantil: "Bebê & Infantil",
+    outros: "Outros"
+  };
+
+  return aliases[original] || categoriaAtual || "Outros";
+}
+
+function normalizarCategoriaImportada(valor, contexto = "") {
+  const textoCombinado = [valor, contexto].filter(Boolean).join(" ");
+  const categoria = categoriaInteligentePorTexto(textoCombinado, valor);
+
+  // "Outros" não deve encerrar a classificação quando ainda temos
+  // nome/descrição do produto para analisar.
+  if (categoria === "Outros" && contexto) {
+    return categoriaInteligentePorTexto(contexto, "");
+  }
+
+  return categoria;
+}
+
+function preencherSeVazio(seletor, valor) {
+  if (valor === null || valor === undefined || valor === "") {
+    return false;
+  }
+
+  const elemento = obterElemento(seletor);
+
+  if (!elemento || elemento.value.trim()) {
+    return false;
+  }
+
+  elemento.value = String(valor).trim();
+  return true;
+}
+
+function preencherSelectSeVazio(seletor, valor) {
+  if (!valor) {
+    return false;
+  }
+
+  const select = obterElemento(seletor);
+
+  if (!select || select.value) {
+    return false;
+  }
+
+  selecionarOpcao(seletor, valor);
+  return true;
+}
+
+function aplicarDadosImportados(dados) {
+  const preenchidos = [];
+
+  if (preencherSeVazio("#nome", dados.nome)) {
+    preenchidos.push("nome");
+  }
+
+  if (preencherSelectSeVazio("#loja", dados.loja)) {
+    preenchidos.push("loja");
+  }
+
+  const contextoCategoria = [
+    dados.categoria,
+    dados.categoriaOrigem,
+    dados.sourceCategory,
+    dados.subcategoria,
+    dados.nome,
+    dados.descricao
+  ].filter(Boolean).join(" ");
+
+  const categoria = normalizarCategoriaImportada(
+    dados.categoria || dados.categoriaOrigem || dados.sourceCategory || "",
+    contextoCategoria
+  );
+
+  if (preencherSelectSeVazio("#categoria", categoria)) {
+    preenchidos.push("categoria");
+  }
+
+  if (dados.precoAtual && !campoPrecoAtual.value) {
+    campoPrecoAtual.value = formatarMoedaExistente(
+      dados.precoAtual
+    );
+    preenchidos.push("preço atual");
+  }
+
+  if (dados.precoAntigo && !campoPrecoAntigo.value) {
+    campoPrecoAntigo.value = formatarMoedaExistente(
+      dados.precoAntigo
+    );
+    preenchidos.push("preço antigo");
+  }
+
+  if (preencherSeVazio("#parcelas", dados.parcelas)) {
+    preenchidos.push("parcelamento");
+  }
+
+  if (preencherSeVazio("#avaliacao", dados.avaliacao)) {
+    preenchidos.push("avaliação");
+  }
+
+  const imagens = Array.isArray(dados.imagens)
+    ? dados.imagens.filter(Boolean)
+    : [];
+
+  if (imagens.length > 0 && !obterValor("#imagens")) {
+    definirValor("#imagens", imagens.join("\n"));
+    preenchidos.push(
+      `${imagens.length} imagem${imagens.length === 1 ? "" : "s"}`
+    );
+  }
+
+  return preenchidos;
+}
+
+async function buscarInformacoesProduto() {
+  const link = obterValor("#link");
+
+  esconderMensagem();
+  esconderResultadoImportacao();
+
+  if (!link) {
+    mostrarResultadoImportacao(
+      "Cole primeiro o link de afiliado do produto.",
+      "erro"
+    );
+    return;
+  }
+
+  if (URL_IMPORTADOR_PRODUTOS.includes("COLE_AQUI")) {
+    mostrarResultadoImportacao(
+      "O importador ainda não foi conectado. Publique o Worker e cole a URL dele no arquivo admin.js.",
+      "erro"
+    );
+    return;
+  }
+
+  const textoOriginal = botaoBuscarInformacoes.textContent;
+
+  try {
+    botaoBuscarInformacoes.disabled = true;
+    botaoBuscarInformacoes.textContent = "Buscando...";
+
+    mostrarResultadoImportacao(
+      "Abrindo o link e procurando as informações do produto...",
+      "aviso"
+    );
+
+    const resposta = await fetch(URL_IMPORTADOR_PRODUTOS, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ url: link })
+    });
+
+    const retorno = await resposta.json().catch(() => ({}));
+
+    if (!resposta.ok) {
+      throw new Error(
+        retorno.erro ||
+          "Não foi possível consultar esse produto."
+      );
+    }
+
+    const preenchidos = aplicarDadosImportados(
+      retorno.produto || {}
+    );
+
+    if (preenchidos.length === 0) {
+      mostrarResultadoImportacao(
+        "O link foi aberto, mas a loja não forneceu informações aproveitáveis. Preencha os campos manualmente.",
+        "aviso"
+      );
+      return;
+    }
+
+    mostrarResultadoImportacao(
+      `Encontrado automaticamente: ${preenchidos.join(", ")}. Confira os dados e complete o que estiver faltando.`,
+      retorno.parcial ? "aviso" : "sucesso"
+    );
+  } catch (erro) {
+    console.error("Erro ao importar produto:", erro);
+
+    mostrarResultadoImportacao(
+      erro.message ||
+        "Não foi possível buscar as informações. Você ainda pode preencher o produto manualmente.",
+      "erro"
+    );
+  } finally {
+    botaoBuscarInformacoes.disabled = false;
+    botaoBuscarInformacoes.textContent = textoOriginal;
+  }
+}
+
+/* =========================
+   IMAGENS
+========================= */
+
+function obterImagensDoFormulario() {
+  const conteudo = obterValor("#imagens");
+
+  return conteudo
+    .split(/\r?\n/)
+    .map((imagem) => imagem.trim())
+    .filter((imagem) => imagem.length > 0);
+}
+
+function obterImagensProduto(produto) {
+  if (
+    Array.isArray(produto.imagens) &&
+    produto.imagens.length > 0
+  ) {
+    return produto.imagens;
+  }
+
+  if (produto.imagem) {
+    return [produto.imagem];
+  }
+
+  return [];
+}
+
+/* =========================
+   MONTAGEM E VALIDAÇÃO
+========================= */
+
+function montarProduto() {
+  const imagens = obterImagensDoFormulario();
+
+  return {
+    nome: obterValor("#nome"),
+    loja: obterValor("#loja"),
+    categoria: obterValor("#categoria"),
+
+    precoAntigo: formatarMoedaExistente(
+      obterValor("#preco-antigo")
+    ),
+
+    precoAtual: formatarMoedaExistente(
+      obterValor("#preco-atual")
+    ),
+
+    parcelas: obterValor("#parcelas"),
+    avaliacao: obterValor("#avaliacao"),
+    economia: obterValor("#economia"),
+    score: obterValor("#score"),
+    badge: obterValor("#badge"),
+
+    imagens,
+
+    // Mantém compatibilidade com o site
+    imagem: imagens[0] || "",
+
+    link: obterValor("#link")
+  };
+}
+
+function validarProduto(produto) {
+  if (!produto.nome) {
+    mostrarMensagem("Digite o nome do produto.");
+    return false;
+  }
+
+  if (!produto.loja) {
+    mostrarMensagem("Selecione a loja.");
+    return false;
+  }
+
+  if (!produto.categoria) {
+    mostrarMensagem("Selecione a categoria.");
+    return false;
+  }
+
+  if (!produto.precoAtual) {
+    mostrarMensagem("Digite o preço atual.");
+    return false;
+  }
+
+  if (
+    converterMoedaParaNumero(produto.precoAtual) <= 0
+  ) {
+    mostrarMensagem(
+      "Digite um preço atual válido."
+    );
+
+    return false;
+  }
+
+  if (produto.imagens.length === 0) {
+    mostrarMensagem(
+      "Adicione pelo menos uma imagem do produto."
+    );
+
+    return false;
+  }
+
+  if (!produto.link) {
+    mostrarMensagem("Digite o link de afiliado.");
+    return false;
+  }
+
+  return true;
+}
+
+/* =========================
+   NOVO PRODUTO / EDIÇÃO
+========================= */
+
+function ativarModoEdicao(produto) {
+  produtoEmEdicao = produto;
+  produtoId.value = produto.id;
+
+  definirValor("#nome", produto.nome);
+
+  selecionarOpcao("#loja", produto.loja);
+  selecionarOpcao(
+    "#categoria",
+    produto.categoria
+  );
+
+  definirValor(
+    "#preco-antigo",
+    formatarMoedaExistente(produto.precoAntigo)
+  );
+
+  definirValor(
+    "#preco-atual",
+    formatarMoedaExistente(produto.precoAtual)
+  );
+
+  definirValor("#parcelas", produto.parcelas);
+  definirValor("#avaliacao", produto.avaliacao);
+
+  selecionarOpcao(
+    "#economia",
+    produto.economia
+  );
+
+  definirValor("#score", produto.score);
+
+  selecionarOpcao(
+    "#badge",
+    produto.badge
+  );
+
+  definirValor("#link", produto.link);
+
+  const imagens = obterImagensProduto(produto);
+
+  definirValor(
+    "#imagens",
+    imagens.join("\n")
+  );
+
+  tituloFormulario.textContent =
+    "Editar produto";
+
+  descricaoFormulario.textContent =
+    `Editando: ${produto.nome}`;
+
+  indicadorEdicao.hidden = false;
+
+  botaoPublicar.textContent =
+    "Salvar alterações";
+
+  botaoCancelarEdicao.hidden = false;
+
+  esconderMensagem();
+
+  formulario.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  obterElemento("#nome")?.focus();
+}
+
+function cancelarEdicao() {
+  produtoEmEdicao = null;
+  produtoId.value = "";
+
+  formulario.reset();
+
+  tituloFormulario.textContent =
+    "Novo produto";
+
+  descricaoFormulario.textContent =
+    "Cadastre uma nova oferta no SmartDeals.";
+
+  indicadorEdicao.hidden = true;
+
+  botaoPublicar.textContent =
+    "Publicar produto";
+
+  botaoCancelarEdicao.hidden = true;
+
+  esconderMensagem();
+  esconderResultadoImportacao();
+}
+
+async function publicarProduto(produto) {
+  await addDoc(
+    collection(db, "produtos"),
+    {
+      ...produto,
+      criadoEm: serverTimestamp(),
+      atualizadoEm: serverTimestamp()
+    }
+  );
+}
+
+async function atualizarProduto(id, produto) {
+  await updateDoc(
+    doc(db, "produtos", id),
+    {
+      ...produto,
+      atualizadoEm: serverTimestamp()
+    }
+  );
+}
+
+async function salvarProduto(evento) {
+  evento.preventDefault();
+
+  esconderMensagem();
+
+  const produto = montarProduto();
+
+  if (!validarProduto(produto)) {
+    return;
+  }
+
+  const estaEditando = Boolean(produtoEmEdicao);
+  const idEmEdicao = produtoEmEdicao?.id;
+
+  try {
+    botaoPublicar.disabled = true;
+
+    botaoPublicar.textContent = estaEditando
+      ? "Salvando..."
+      : "Publicando...";
+
+    if (estaEditando) {
+      await atualizarProduto(
+        idEmEdicao,
+        produto
+      );
+    } else {
+      await publicarProduto(produto);
+    }
+
+    cancelarEdicao();
+
+    await carregarProdutos();
+
+    mostrarMensagem(
+      estaEditando
+        ? "Produto atualizado com sucesso!"
+        : "Produto publicado com sucesso!",
+      "sucesso"
+    );
+  } catch (erro) {
+    console.error(
+      "Erro ao salvar produto:",
+      erro
+    );
+
+    mostrarMensagem(
+      estaEditando
+        ? "Não foi possível atualizar o produto."
+        : "Não foi possível publicar o produto."
+    );
+  } finally {
+    botaoPublicar.disabled = false;
+
+    botaoPublicar.textContent =
+      produtoEmEdicao
+        ? "Salvar alterações"
+        : "Publicar produto";
+  }
+}
+
+/* =========================
+   LISTAGEM
+========================= */
+
+function criarItemProduto(produto) {
+  const nome = escaparHtml(produto.nome);
+  const loja = escaparHtml(produto.loja);
+  const categoria = escaparHtml(
+    produto.categoria
+  );
+
+  const precoAtual = escaparHtml(
+    formatarMoedaExistente(produto.precoAtual)
+  );
+
+  const imagens = obterImagensProduto(produto);
+  const imagemPrincipal = imagens[0] || "";
+  const totalImagens = imagens.length;
+
+  return `
+    <article class="admin-product">
+
+      <div class="admin-product-info">
+
+        <div class="admin-product-imagem">
+          ${
+            imagemPrincipal
+              ? `
+                <img
+                  src="${imagemPrincipal}"
+                  alt="${nome}"
+                  loading="lazy"
+                >
+              `
+              : `
+                <span>Sem foto</span>
+              `
+          }
+        </div>
+
+        <div>
+          <h3>${nome}</h3>
+
+          <p>
+            ${loja} · ${categoria} · ${precoAtual}
+          </p>
+
+          <p>
+            ${totalImagens}
+            foto${totalImagens === 1 ? "" : "s"}
+          </p>
+        </div>
+
+      </div>
+
+      <div class="admin-product-acoes">
+
+        <button
+          type="button"
+          data-id="${produto.id}"
+          class="botao-editar"
+        >
+          Editar
+        </button>
+
+        <button
+          type="button"
+          data-id="${produto.id}"
+          class="botao-excluir"
+        >
+          Excluir
+        </button>
+
+      </div>
+
+    </article>
+  `;
+}
+
+function mostrarProdutos() {
+  contadorProdutos.textContent =
+    `${produtos.length} produto${
+      produtos.length === 1 ? "" : "s"
+    }`;
+
+  if (produtos.length === 0) {
+    listaProdutos.innerHTML = `
+      <p class="lista-vazia">
+        Nenhum produto cadastrado.
+      </p>
+    `;
+
+    return;
+  }
+
+  listaProdutos.innerHTML = produtos
+    .map(criarItemProduto)
+    .join("");
+}
+
+async function carregarProdutos() {
+  try {
+    listaProdutos.innerHTML = `
+      <p class="lista-vazia">
+        Carregando produtos...
+      </p>
+    `;
+
+    const consulta = query(
+      collection(db, "produtos"),
+      orderBy("criadoEm", "desc")
+    );
+
+    const resultado = await getDocs(consulta);
+
+    produtos = resultado.docs.map(
+      (documento) => ({
+        id: documento.id,
+        ...documento.data()
+      })
+    );
+
+    mostrarProdutos();
+  } catch (erro) {
+    console.error(
+      "Erro ao carregar produtos:",
+      erro
+    );
+
+    contadorProdutos.textContent =
+      "Erro ao carregar";
+
+    listaProdutos.innerHTML = `
+      <p class="lista-vazia">
+        Não foi possível carregar os produtos.
+      </p>
+    `;
+  }
+}
+
+
+/* =========================
+   RECLASSIFICAÇÃO DE CATEGORIAS
+   Atualiza os registros já existentes no Firestore.
+========================= */
+
+async function reclassificarProdutosExistentes() {
+  if (!produtos.length) {
+    mostrarMensagem("Não há produtos carregados para reclassificar.");
+    return;
+  }
+
+  const alteracoes = produtos
+    .map((produto) => {
+      const categoriaNova = categoriaInteligentePorTexto(
+        `${produto.nome || ""} ${produto.descricao || ""}`,
+        produto.categoria || ""
+      );
+
+      return {
+        produto,
+        categoriaNova
+      };
+    })
+    .filter(({ produto, categoriaNova }) =>
+      categoriaNova && categoriaNova !== produto.categoria
+    );
+
+  if (!alteracoes.length) {
+    mostrarMensagem(
+      "As categorias já estão atualizadas.",
+      "sucesso"
+    );
+    return;
+  }
+
+  const confirmou = confirm(
+    `Vou corrigir a categoria de ${alteracoes.length} produto(s) já cadastrados. Deseja continuar?`
+  );
+
+  if (!confirmou) {
+    return;
+  }
+
+  const textoOriginal = botaoReclassificarProdutos.textContent;
+
+  try {
+    botaoReclassificarProdutos.disabled = true;
+
+    for (let indice = 0; indice < alteracoes.length; indice += 1) {
+      const { produto, categoriaNova } = alteracoes[indice];
+
+      botaoReclassificarProdutos.textContent =
+        `Corrigindo ${indice + 1}/${alteracoes.length}...`;
+
+      await updateDoc(
+        doc(db, "produtos", produto.id),
+        {
+          categoria: categoriaNova,
+          atualizadoEm: serverTimestamp()
+        }
+      );
+    }
+
+    await carregarProdutos();
+
+    mostrarMensagem(
+      `${alteracoes.length} produto(s) reclassificado(s) com sucesso!`,
+      "sucesso"
+    );
+  } catch (erro) {
+    console.error("Erro ao reclassificar categorias:", erro);
+    mostrarMensagem(
+      "Não foi possível concluir a reclassificação das categorias."
+    );
+  } finally {
+    botaoReclassificarProdutos.disabled = false;
+    botaoReclassificarProdutos.textContent = textoOriginal;
+  }
+}
+
+/* =========================
+   EDITAR E EXCLUIR
+========================= */
+
+function editarProduto(id) {
+  const produto = produtos.find(
+    (item) => item.id === id
+  );
+
+  if (!produto) {
+    mostrarMensagem(
+      "Não foi possível encontrar esse produto."
+    );
+
+    return;
+  }
+
+  ativarModoEdicao(produto);
+}
+
+async function excluirProduto(id) {
+  const produto = produtos.find(
+    (item) => item.id === id
+  );
+
+  const confirmou = confirm(
+    produto
+      ? `Tem certeza que deseja excluir "${produto.nome}"?`
+      : "Tem certeza que deseja excluir este produto?"
+  );
+
+  if (!confirmou) {
+    return;
+  }
+
+  try {
+    await deleteDoc(
+      doc(db, "produtos", id)
+    );
+
+    if (produtoEmEdicao?.id === id) {
+      cancelarEdicao();
+    }
+
+    await carregarProdutos();
+
+    mostrarMensagem(
+      "Produto excluído com sucesso.",
+      "sucesso"
+    );
+  } catch (erro) {
+    console.error(
+      "Erro ao excluir produto:",
+      erro
+    );
+
+    mostrarMensagem(
+      "Não foi possível excluir o produto."
+    );
+  }
+}
+
+/* =========================
+   EVENTOS
+========================= */
+
+listaProdutos.addEventListener(
+  "click",
+  (evento) => {
+    const botaoEditar = evento.target.closest(
+      ".botao-editar"
+    );
+
+    if (botaoEditar) {
+      editarProduto(botaoEditar.dataset.id);
+      return;
+    }
+
+    const botaoExcluir = evento.target.closest(
+      ".botao-excluir"
+    );
+
+    if (botaoExcluir) {
+      excluirProduto(botaoExcluir.dataset.id);
+    }
+  }
+);
+
+botaoBuscarInformacoes?.addEventListener(
+  "click",
+  buscarInformacoesProduto
+);
+
+formulario.addEventListener(
+  "submit",
+  salvarProduto
+);
+
+botaoCancelarEdicao.addEventListener(
+  "click",
+  cancelarEdicao
+);
+
+botaoReclassificarProdutos?.addEventListener(
+  "click",
+  reclassificarProdutosExistentes
+);
+
+botaoAtualizarProdutos.addEventListener(
+  "click",
+  carregarProdutos
+);

@@ -1,0 +1,17 @@
+SMARTDEALS ATUALIZADO
+
+Alterações realizadas:
+- Visual completo da seção de lojas.
+- Destaque da loja selecionada.
+- Destaque da categoria selecionada.
+- Barra de filtros ativos.
+- Botão para limpar filtros.
+- Ajustes responsivos para computador, tablet e celular.
+- Filtro combinado por loja, categoria e pesquisa mantido no app.js.
+- Formatação de preços sem duplicar "R$" mantida.
+
+Para usar:
+1. Extraia o ZIP.
+2. Abra a pasta SmartDeals no VS Code.
+3. Execute npm install caso necessário.
+4. Execute npm run dev.

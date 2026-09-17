@@ -1,0 +1,11 @@
+SmartDeals Desktop v6
+
+- Menu Categorias menor, com 2 colunas e alinhado à direita para não sair da tela.
+- Nome dos produtos mais compacto nos cards de 6 colunas.
+- Mantida a busca fixa/sticky da v4/v5.
+- Classificador administrativo ampliado.
+- Novo botão no Admin: “Reclassificar categorias”.
+  Ele analisa os produtos já existentes no Firebase, mostra uma confirmação
+  e atualiza apenas os registros cuja categoria realmente precisa mudar.
+- Moda prioriza roupas, lingerie, tênis, chinelos e acessórios.
+- Beleza reconhece óleo capilar/cabelo; Casa & Cozinha fica mais específica.

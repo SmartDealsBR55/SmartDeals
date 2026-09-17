@@ -1,1 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="SmartDeals — seu universo de ofertas e achados."
+  >
+
+  <title>SmartDeals | Ofertas e Achados</title>
+
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+  <header>
+
+    <a href="#" class="logo" aria-label="Voltar ao início">
+
+      <img
+        src="assets/images/logo/sd-logo.png"
+        alt="Logo SmartDeals"
+        class="logo-img"
+      >
+
+      <div class="logo-texto">
+        <h1>SmartDeals</h1>
+        <p>Seu universo de ofertas e achados.</p>
+      </div>
+
+    </a>
+
+    <div class="header-scroll-search" id="header-scroll-search" aria-hidden="true">
+      <input
+        id="campo-pesquisa-sticky"
+        type="search"
+        placeholder="Buscar produtos, lojas e ofertas..."
+        aria-label="Pesquisar produtos no SmartDeals"
+      >
+      <button
+        id="botao-pesquisa-sticky"
+        type="button"
+        aria-label="Pesquisar"
+      >
+        Pesquisar
+      </button>
+    </div>
+
+    <nav aria-label="Navegação principal">
+      <a href="#">Início</a>
+      <a href="#lojas">Lojas</a>
+
+      <div class="nav-categorias">
+        <button type="button" class="nav-categorias-botao" aria-expanded="false">Categorias <span>⌄</span></button>
+        <div class="nav-categorias-menu" aria-label="Categorias do SmartDeals">
+          <button type="button" class="category-card" data-categoria="">Todas as categorias</button>
+          <button type="button" class="category-card" data-categoria="Eletrônicos">Eletrônicos</button>
+          <button type="button" class="category-card" data-categoria="Informática">Informática</button>
+          <button type="button" class="category-card" data-categoria="Games">Games</button>
+          <button type="button" class="category-card" data-categoria="Moda">Moda</button>
+          <button type="button" class="category-card" data-categoria="Beleza">Beleza</button>
+          <button type="button" class="category-card" data-categoria="Casa & Cozinha">Casa & Cozinha</button>
+          <button type="button" class="category-card" data-categoria="Esportes">Esportes</button>
+          <button type="button" class="category-card" data-categoria="Bebê & Infantil">Bebê & Infantil</button>
+          <button type="button" class="category-card" data-categoria="Pets">Pets</button>
+          <button type="button" class="category-card" data-categoria="Automotivo">Automotivo</button>
+          <button type="button" class="category-card" data-categoria="Ferramentas">Ferramentas</button>
+          <button type="button" class="category-card" data-categoria="Outros">Outros</button>
+        </div>
+      </div>
+
+      <a href="#achados">Ofertas</a>
+    </nav>
+
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+      <div class="hero-copy">
+
+        <span class="hero-badge">
+          Ofertas selecionadas todos os dias
+        </span>
+
+        <h2>
+          As melhores ofertas da
+          <strong>internet.</strong>
+        </h2>
+
+        <p>
+          Escolha sua loja favorita, selecione uma categoria e encontre
+          produtos com bons preços em poucos segundos.
+        </p>
+
+        <div class="hero-search">
+
+          <input
+            id="campo-pesquisa"
+            type="search"
+            placeholder="O que você procura hoje?"
+            aria-label="Pesquisar produtos"
+          >
+
+          <button
+            id="botao-pesquisa"
+            type="button"
+          >
+            Explorar ofertas
+          </button>
+
+        </div>
+
+        <div class="hero-benefits">
+          <span>Ofertas verificadas</span>
+          <span>Produtos selecionados</span>
+          <span>Links seguros</span>
+        </div>
+
+      </div>
+
+      <div class="hero-visual">
+
+        <div class="hero-logo-frame">
+
+          <div class="hero-orbit"></div>
+
+          <img
+            src="assets/images/logo/sd-logo.png"
+            alt="Logo SD SmartDeals"
+            class="hero-logo-image"
+          >
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- LOJAS -->
+
+    <section class="stores" id="lojas">
+
+      <div class="section-heading">
+
+        <span class="section-badge">
+          Compre onde preferir
+        </span>
+
+        <h2>Escolha sua loja favorita</h2>
+
+        <p>
+          Selecione uma loja para visualizar somente as ofertas disponíveis
+          nela. Depois, você também pode escolher uma categoria.
+        </p>
+
+      </div>
+
+      <div class="stores-grid">
+
+        <button
+          type="button"
+          class="store-card active"
+          data-loja=""
+        >
+          <span class="store-icon">🛍️</span>
+
+          <span class="store-content">
+            <strong>Todas as lojas</strong>
+            <small>Mostrar todas as ofertas</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="store-card"
+          data-loja="Amazon"
+        >
+          <span class="store-icon">📦</span>
+
+          <span class="store-content">
+            <strong>Amazon</strong>
+            <small>Ofertas da Amazon</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="store-card"
+          data-loja="Shopee"
+        >
+          <span class="store-icon">🛒</span>
+
+          <span class="store-content">
+            <strong>Shopee</strong>
+            <small>Achados da Shopee</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="store-card"
+          data-loja="Mercado Livre"
+        >
+          <span class="store-icon">🤝</span>
+
+          <span class="store-content">
+            <strong>Mercado Livre</strong>
+            <small>Ofertas do Mercado Livre</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="store-card"
+          data-loja="Temu"
+        >
+          <span class="store-icon">🎁</span>
+
+          <span class="store-content">
+            <strong>Temu</strong>
+            <small>Produtos e novidades</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="store-card"
+          data-loja="AliExpress"
+        >
+          <span class="store-icon">🌎</span>
+
+          <span class="store-content">
+            <strong>AliExpress</strong>
+            <small>Ofertas internacionais</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="store-card"
+          data-loja="Magazine Luiza"
+        >
+          <span class="store-icon">🏪</span>
+
+          <span class="store-content">
+            <strong>Magazine Luiza</strong>
+            <small>Ofertas do Magalu</small>
+          </span>
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- CATEGORIAS -->
+
+    <section class="categories" id="categorias">
+
+      <div class="section-heading">
+
+        <span class="section-badge">
+          Explore por categoria
+        </span>
+
+        <h2>Agora escolha a categoria</h2>
+
+        <p>
+          Combine loja e categoria para encontrar exatamente o tipo de
+          produto que procura.
+        </p>
+
+      </div>
+
+      <div class="categories-grid">
+
+        <button type="button" class="category-card active" data-categoria="">
+          <span class="category-icon">✨</span><h3>Todas</h3><p>Todas as ofertas.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Eletrônicos">
+          <span class="category-icon">📱</span><h3>Eletrônicos</h3><p>Celulares, áudio e tecnologia.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Informática">
+          <span class="category-icon">💻</span><h3>Informática</h3><p>PC, notebook e acessórios.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Games">
+          <span class="category-icon">🎮</span><h3>Games</h3><p>Consoles, jogos e periféricos.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Moda">
+          <span class="category-icon">👕</span><h3>Moda</h3><p>Roupas, calçados e acessórios.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Beleza">
+          <span class="category-icon">✨</span><h3>Beleza</h3><p>Cuidados pessoais e beleza.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Casa & Cozinha">
+          <span class="category-icon">🏠</span><h3>Casa & Cozinha</h3><p>Utilidades, decoração e cozinha.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Esportes">
+          <span class="category-icon">🏃</span><h3>Esportes</h3><p>Treino, fitness e lazer.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Bebê & Infantil">
+          <span class="category-icon">🧸</span><h3>Bebê & Infantil</h3><p>Produtos para bebês e crianças.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Pets">
+          <span class="category-icon">🐶</span><h3>Pets</h3><p>Produtos para cães e gatos.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Automotivo">
+          <span class="category-icon">🚗</span><h3>Automotivo</h3><p>Acessórios para carro e moto.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Ferramentas">
+          <span class="category-icon">🛠️</span><h3>Ferramentas</h3><p>Ferramentas e manutenção.</p>
+        </button>
+        <button type="button" class="category-card" data-categoria="Outros">
+          <span class="category-icon">➕</span><h3>Outros</h3><p>Achados de outras categorias.</p>
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- FILTROS ATIVOS -->
+
+    <section
+      id="filtros-ativos"
+      class="active-filters"
+      hidden
+    >
+
+      <div class="active-filters-content">
+
+        <div>
+          <span class="active-filters-label">
+            Filtros selecionados
+          </span>
+
+          <div
+            id="lista-filtros-ativos"
+            class="active-filters-list"
+          ></div>
+        </div>
+
+        <button
+          id="botao-limpar-filtros"
+          type="button"
+          class="clear-filters-button"
+        >
+          Limpar filtros
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- ACHADOS DO DIA -->
+
+    <section class="deals" id="achados">
+
+      <div class="section-heading">
+
+        <span class="section-badge">
+          Seleção SmartDeals
+        </span>
+
+        <h2 id="titulo-produtos">
+          Todos os produtos
+        </h2>
+
+        <p id="descricao-produtos">
+          Produtos selecionados com bons descontos e ótimo custo-benefício.
+        </p>
+
+      </div>
+
+      <div
+        class="deals-grid"
+        id="deals-grid"
+      >
+        <!-- O JavaScript insere os produtos do Firestore aqui -->
+      </div>
+
+      <p
+        id="mensagem-produtos"
+        hidden
+      >
+        Nenhum produto encontrado com esses filtros.
+      </p>
+
+    </section>
+
+  </main>
+
+  <script
+    type="module"
+    src="assets/js/app.js"
+  ></script>
+
+</body>
+</html>

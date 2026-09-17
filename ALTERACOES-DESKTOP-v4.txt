@@ -1,0 +1,8 @@
+SmartDeals Desktop v4
+
+- Mantém a busca grande do Hero.
+- Adiciona uma busca compacta no cabeçalho.
+- A busca compacta só aparece quando a busca grande do Hero sai da tela.
+- A busca compacta e a busca grande ficam sincronizadas.
+- Pesquisar pela barra fixa aplica os mesmos filtros e leva o usuário às ofertas.
+- Comportamento aplicado apenas no desktop nesta etapa.

@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "nome": "Fone Bluetooth Premium",
+    "loja": "Amazon",
+    "categoria": "Eletrônicos",
+    "precoAntigo": "299,90",
+    "precoAtual": "179,90",
+    "parcelas": "6x de R$ 29,98",
+    "avaliacao": "4,8",
+    "economia": "40%",
+    "score": "9,3",
+    "badge": "Oferta Relâmpago",
+    "imagem": "assets/images/produtos/fone-bluetooth.webp",
+    "link": "#"
+  },
+  {
+    "id": 2,
+    "nome": "Air Fryer Digital 5 Litros",
+    "loja": "Mercado Livre",
+    "categoria": "Casa",
+    "precoAntigo": "649,90",
+    "precoAtual": "429,90",
+    "parcelas": "10x de R$ 42,99",
+    "avaliacao": "4,9",
+    "economia": "34%",
+    "score": "9,6",
+    "badge": "Mais Vendido",
+    "emoji": "🍟",
+    "link": "#"
+  },
+  {
+    "id": 3,
+    "nome": "Smartwatch Tela AMOLED",
+    "loja": "Shopee",
+    "categoria": "Eletrônicos",
+    "precoAntigo": "399,90",
+    "precoAtual": "249,90",
+    "parcelas": "8x de R$ 31,23",
+    "avaliacao": "4,7",
+    "economia": "38%",
+    "score": "9,1",
+    "badge": "Escolha SmartDeals",
+    "emoji": "⌚",
+    "link": "#"
+  }
+]
