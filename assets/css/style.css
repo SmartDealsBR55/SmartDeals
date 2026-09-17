@@ -24,11 +24,14 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
-  overflow-x: hidden;
+  max-width: 100%;
+  overflow-x: clip;
   font-family: Arial, Helvetica, sans-serif;
   color: var(--cor-branca);
   background:
@@ -1681,6 +1684,19 @@ body.header-search-visible .header-scroll-search {
 /* Entrada rápida nas ofertas em telas pequenas. */
 @media (max-width: 760px) {
   header { gap: 6px; padding: 10px 16px 6px; }
+  .nav-categorias-menu {
+    left: 0;
+    transform: translateY(-8px);
+    width: min(88vw, 360px);
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  .nav-categorias:hover .nav-categorias-menu,
+  .nav-categorias:focus-within .nav-categorias-menu {
+    transform: translateY(0);
+  }
+  .hero, .stores, .categories, .deals,
+  .deals-grid, .product-card { min-width: 0; max-width: 100%; }
   .logo-img { width: 32px; height: 32px; }
   .logo-texto h1 { font-size: 1.25rem; }
   nav { gap: 18px; padding-bottom: 2px; }
