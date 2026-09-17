@@ -437,16 +437,20 @@ function categoriaInteligentePorTexto(valor, categoriaAtual = "") {
 }
 
 function normalizarCategoriaImportada(valor, contexto = "") {
+  if (![valor, contexto].some((parte) => String(parte || "").trim())) {
+    return "";
+  }
   const textoCombinado = [valor, contexto].filter(Boolean).join(" ");
   const categoria = categoriaInteligentePorTexto(textoCombinado, valor);
 
   // "Outros" não deve encerrar a classificação quando ainda temos
   // nome/descrição do produto para analisar.
   if (categoria === "Outros" && contexto) {
-    return categoriaInteligentePorTexto(contexto, "");
+    const alternativa = categoriaInteligentePorTexto(contexto, "");
+    return alternativa === "Outros" ? "" : alternativa;
   }
 
-  return categoria;
+  return categoria === "Outros" ? "" : categoria;
 }
 
 function preencherSeVazio(seletor, valor) {
@@ -598,9 +602,16 @@ async function buscarInformacoesProduto() {
       retorno.produto || {}
     );
 
-    if (preenchidos.length === 0) {
+    const faltando = [
+      ["nome", obterValor("#nome")],
+      ["categoria", obterValor("#categoria")],
+      ["preço atual", obterValor("#preco-atual")],
+      ["imagem", obterValor("#imagens")]
+    ].filter(([, valor]) => !valor).map(([nome]) => nome);
+
+    if (faltando.length > 0) {
       mostrarResultadoImportacao(
-        "O link foi aberto, mas a loja não forneceu informações aproveitáveis. Preencha os campos manualmente.",
+        `A loja não forneceu todos os dados. Complete manualmente: ${faltando.join(", ")}. Confira também loja e categoria antes de publicar.`,
         "aviso"
       );
       return;
@@ -1225,6 +1236,12 @@ botaoBuscarInformacoes?.addEventListener(
   "click",
   buscarInformacoesProduto
 );
+
+obterElemento("#nome")?.addEventListener("blur", () => {
+  if (obterValor("#categoria")) return;
+  const categoria = normalizarCategoriaImportada("", obterValor("#nome"));
+  if (categoria) selecionarOpcao("#categoria", categoria);
+});
 
 formulario.addEventListener(
   "submit",

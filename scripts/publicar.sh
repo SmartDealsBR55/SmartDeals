@@ -10,7 +10,7 @@ cp dist/pages/login.source.html pages/login.html
 cp dist/pages/admin.source.html pages/admin.html
 cp -a dist/assets/. assets/
 
-rm -f SmartDeals-atualizacao.zip
+rm -f SmartDeals-atualizacao.zip SmartDeals-painel-celular.zip SmartDeals-correcao-importacao.zip SmartDeals-categorias-compactas.zip
 git add -A
 if git diff --cached --quiet; then
   echo 'Nenhuma alteração nova para enviar.'

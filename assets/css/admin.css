@@ -968,3 +968,73 @@ form > button:hover:not(:disabled),
     width: 100%;
   }
 }
+
+/* Cadastro rápido: campos necessários à vista, extras recolhidos. */
+.campos-essenciais,
+.detalhes-opcionais {
+  margin-top: 24px;
+}
+
+.campos-essenciais h3 {
+  font-size: 1.12rem;
+}
+
+.campos-essenciais > p {
+  margin-top: 6px;
+  color: var(--cinza);
+  font-size: .87rem;
+  line-height: 1.45;
+}
+
+.detalhes-opcionais {
+  padding: 18px;
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, .18);
+}
+
+.detalhes-opcionais summary {
+  cursor: pointer;
+  color: var(--dourado-claro);
+  font-weight: 700;
+}
+
+.detalhes-opcionais summary span {
+  display: block;
+  margin: 6px 0 0 19px;
+  color: var(--cinza);
+  font-size: .8rem;
+  font-weight: 400;
+}
+
+@media (max-width: 760px) {
+  .admin-header {
+    min-height: 0;
+    padding: 12px 16px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .admin-header h1 { font-size: 1.15rem; }
+  .admin-header p { display: none; }
+  .admin-header a { padding: 9px 10px; font-size: .8rem; white-space: nowrap; }
+
+  .admin-container {
+    width: 100%;
+    padding: 12px 10px 90px;
+    gap: 16px;
+  }
+
+  .admin-card { padding: 18px 14px; border-radius: 16px; }
+  .admin-card h2 { font-size: 1.25rem; }
+  .importador-produto { margin-top: 16px; padding: 14px; }
+  .importador-badge { display: none; }
+  .importador-produto-cabecalho p { font-size: .8rem; }
+  .form-grid { margin-top: 16px; gap: 14px; }
+  .campos-essenciais, .detalhes-opcionais { margin-top: 20px; }
+  input, select, textarea { font-size: 16px; }
+  #imagens { min-height: 90px; }
+  .acoes-formulario { display: grid; gap: 10px; }
+  #botao-publicar { width: 100%; min-height: 52px; }
+}

@@ -1608,6 +1608,37 @@ body.header-search-visible .header-scroll-search {
   flex-wrap: wrap;
 }
 
+/* No celular, categorias viram uma faixa rolável antes das ofertas. */
+@media (max-width: 760px) {
+  .categories { padding: 24px 0 12px; }
+  .categories .section-heading { margin-bottom: 12px; }
+  .categories .section-heading h2 { font-size: 1.25rem; }
+  .categories .section-heading .section-badge,
+  .categories .section-heading p { display: none; }
+  .categories-grid {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    padding: 2px 2px 12px;
+    scrollbar-width: thin;
+  }
+  .categories-grid > .category-card {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 9px 13px;
+    border-radius: 999px;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+  .categories-grid > .category-card:hover { transform: none; }
+  .categories-grid .category-icon,
+  .categories-grid .category-card p { display: none; }
+  .categories-grid .category-card h3 { margin: 0; font-size: .84rem; }
+  .deals { padding-top: 24px; }
+}
+
 /* Grade compacta de ofertas para navegar pelo celular. */
 @media (max-width: 760px) {
   .deals-grid {
@@ -1645,6 +1676,59 @@ body.header-search-visible .header-scroll-search {
     font-size: .63rem !important;
     white-space: normal;
   }
+}
+
+/* Entrada rápida nas ofertas em telas pequenas. */
+@media (max-width: 760px) {
+  header { gap: 6px; padding: 10px 16px 6px; }
+  .logo-img { width: 32px; height: 32px; }
+  .logo-texto h1 { font-size: 1.25rem; }
+  nav { gap: 18px; padding-bottom: 2px; }
+  nav a, .nav-categorias-botao { font-size: .82rem; }
+
+  .hero {
+    min-height: 0;
+    padding: 28px 0 20px;
+    gap: 0;
+  }
+  .hero h2 { font-size: clamp(1.8rem, 8vw, 2.5rem); letter-spacing: -1px; }
+  .hero-copy > p, .hero-badge, .hero-benefits, .hero-visual { display: none; }
+  .hero-search { margin-top: 14px; }
+
+  .stores { padding: 14px 0 8px; }
+  .stores .section-heading { margin-bottom: 12px; }
+  .stores .section-heading h2 { font-size: 1.25rem; }
+  .stores .section-heading p, .stores .section-badge { display: none; }
+  .stores-grid {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    padding: 2px 2px 12px;
+    scrollbar-width: thin;
+  }
+  .stores-grid > .store-card {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 9px 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+  .stores-grid > .store-card:hover { transform: none; }
+  .stores-grid .store-icon {
+    width: auto;
+    height: auto;
+    border: 0;
+    background: none;
+    font-size: 1rem;
+  }
+  .stores-grid .store-content strong { font-size: .84rem; }
+  .stores-grid .store-content small { display: none; }
 }
 
 @media (max-width: 359px) {

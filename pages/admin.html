@@ -15,9 +15,9 @@
 
   <title>Painel Administrativo | SmartDeals</title>
 
-  <script type="module" crossorigin src="../assets/admin-NotxuDmh.js"></script>
+  <script type="module" crossorigin src="../assets/admin-CLJk5o9K.js"></script>
   <link rel="modulepreload" crossorigin href="../assets/firebase-DYvFj7oz.js">
-  <link rel="stylesheet" crossorigin href="../assets/admin-UiZfKZrp.css">
+  <link rel="stylesheet" crossorigin href="../assets/admin-DEy2ayay.css">
 </head>
 
 <body>
@@ -25,7 +25,7 @@
   <header class="admin-header">
     <div>
       <h1>SmartDeals Admin</h1>
-      <p>Cadastro e gerenciamento de produtos</p>
+      <p>Publique e gerencie suas ofertas</p>
     </div>
 
     <a href="../index.html">
@@ -44,7 +44,7 @@
           </h2>
 
           <p id="descricao-formulario">
-            Cadastre uma nova oferta no SmartDeals.
+            Cole o link e confira os dados da oferta.
           </p>
         </div>
 
@@ -105,8 +105,10 @@
           ></div>
         </section>
 
-        <div class="form-grid">
-
+        <div class="campos-essenciais">
+          <h3>Dados para publicar</h3>
+          <p>Confira as informações antes de colocar a oferta no site.</p>
+          <div class="form-grid">
           <label>
             Nome do produto
 
@@ -159,19 +161,6 @@
           </label>
 
           <label>
-            Preço antigo
-
-            <input
-              id="preco-antigo"
-              class="campo-moeda"
-              type="text"
-              inputmode="numeric"
-              autocomplete="off"
-              placeholder="R$ 0,00"
-            >
-          </label>
-
-          <label>
             Preço atual
 
             <input
@@ -181,6 +170,44 @@
               inputmode="numeric"
               autocomplete="off"
               required
+              placeholder="R$ 0,00"
+            >
+          </label>
+
+          <label class="campo-completo">
+            Imagens do produto
+
+            <textarea
+              id="imagens"
+              rows="6"
+              required
+              placeholder="Cole uma imagem por linha:
+
+https://site.com/foto1.jpg
+https://site.com/foto2.jpg
+https://site.com/foto3.jpg"
+            ></textarea>
+
+            <small>
+              Coloque uma URL de imagem em cada linha.
+              A primeira será usada como imagem principal.
+            </small>
+          </label>
+          </div>
+        </div>
+
+        <details class="detalhes-opcionais">
+          <summary>Mais opções <span>Preço antigo, avaliação, selo e outros detalhes</span></summary>
+          <div class="form-grid">
+          <label>
+            Preço antigo
+
+            <input
+              id="preco-antigo"
+              class="campo-moeda"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
               placeholder="R$ 0,00"
             >
           </label>
@@ -282,28 +309,8 @@
               </option>
             </select>
           </label>
-
-          <label class="campo-completo">
-            Imagens do produto
-
-            <textarea
-              id="imagens"
-              rows="6"
-              required
-              placeholder="Cole uma imagem por linha:
-
-https://site.com/foto1.jpg
-https://site.com/foto2.jpg
-https://site.com/foto3.jpg"
-            ></textarea>
-
-            <small>
-              Coloque uma URL de imagem em cada linha.
-              A primeira será usada como imagem principal.
-            </small>
-          </label>
-
-        </div>
+          </div>
+        </details>
 
         <p
           id="mensagem-formulario"
