@@ -12,7 +12,7 @@ const mensagem = document.querySelector("#mensagem-login");
 
 onAuthStateChanged(auth, (usuario) => {
   if (usuario) {
-    window.location.href = "/pages/admin.html";
+    window.location.href = new URL("./admin.html", window.location.href).href;
   }
 });
 
@@ -28,7 +28,7 @@ formulario.addEventListener("submit", async (evento) => {
   try {
     await signInWithEmailAndPassword(auth, email, senha);
 
-    window.location.href = "/pages/admin.html";
+    window.location.href = new URL("./admin.html", window.location.href).href;
   } catch (erro) {
     console.error("Erro no login:", erro.code, erro.message);
 

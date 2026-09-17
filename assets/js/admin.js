@@ -90,7 +90,7 @@ let produtoEmEdicao = null;
 
 onAuthStateChanged(auth, (usuario) => {
   if (!usuario) {
-    window.location.href = "/pages/login.html";
+    window.location.href = new URL("./login.html", window.location.href).href;
     return;
   }
 

@@ -1608,6 +1608,49 @@ body.header-search-visible .header-scroll-search {
   flex-wrap: wrap;
 }
 
+/* Grade compacta de ofertas para navegar pelo celular. */
+@media (max-width: 760px) {
+  .deals-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .product-card { border-radius: 10px; }
+  .product-image { min-height: 112px; height: 112px; }
+  .carousel-slide { padding: 7px; }
+  .carousel-button { width: 26px; height: 26px; font-size: .7rem; }
+  .carousel-indicators { display: none; }
+  .product-badge { top: 5px; left: 5px; padding: 4px 5px; font-size: .57rem; }
+  .product-content { padding: 8px 6px; }
+  .product-store { margin-bottom: 5px; font-size: .6rem; }
+  .product-content h3 {
+    min-height: 0 !important;
+    font-size: .7rem !important;
+    line-height: 1.25 !important;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+  .product-rating { margin-top: 6px; gap: 2px; font-size: .6rem !important; }
+  .product-rating span { letter-spacing: 0; }
+  .old-price { margin-top: 8px; font-size: .65rem; }
+  .current-price { font-size: .9rem; overflow-wrap: anywhere; }
+  .installments { font-size: .6rem; }
+  .product-info { margin-top: 8px; padding: 6px 0; gap: 2px; font-size: .6rem; }
+  .product-button {
+    margin-top: 8px;
+    min-height: 44px !important;
+    padding: 6px 3px !important;
+    font-size: .63rem !important;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 359px) {
+  .deals-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 #botao-reclassificar-produtos {
   border: 1px solid rgba(212, 175, 55, 0.42);
   background: rgba(212, 175, 55, 0.08);
@@ -1617,4 +1660,26 @@ body.header-search-visible .header-scroll-search {
 #botao-reclassificar-produtos:hover:not(:disabled) {
   border-color: #e2bd3c;
   background: rgba(212, 175, 55, 0.15);
+}
+
+.buying-guide,
+.site-footer {
+  width: min(100% - 40px, var(--largura-maxima));
+  margin-inline: auto;
+}
+
+.buying-guide { padding: 35px 0 90px; }
+.buying-guide h2 { margin: 14px 0 24px; font-size: clamp(1.5rem, 3vw, 2.3rem); }
+.buying-guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.buying-guide-grid > div { padding: 22px; border: 1px solid var(--cor-borda); border-radius: 16px; background: var(--cor-card); }
+.buying-guide-grid h3 { margin: 0 0 9px; color: var(--cor-dourada-clara); font-size: 1rem; }
+.buying-guide-grid p,
+.site-footer p { color: var(--cor-cinza); line-height: 1.6; }
+.site-footer { padding: 30px 0 42px; border-top: 1px solid var(--cor-borda); font-size: .88rem; }
+.site-footer strong { color: var(--cor-dourada-clara); }
+.site-footer p { max-width: 780px; margin: 7px 0; }
+
+@media (max-width: 760px) {
+  .buying-guide-grid { grid-template-columns: 1fr; }
+  .buying-guide { padding-bottom: 55px; }
 }
