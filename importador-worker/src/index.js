@@ -298,6 +298,32 @@ class ColetorJsonLd {
   }
 }
 
+
+function extrairDadosEmbutidos(html, dados) {
+  const texto = html.replace(/\\u0022/g, '"').replace(/\\"/g, '"');
+  const nome = texto.match(/"(?:productName|product_name|itemName|item_name)"\s*:\s*"([^"\\]{8,280})"/i);
+  if (nome) dados.nome ||= textoLimpo(nome[1]);
+
+  const preco = texto.match(/"(?:price_min|priceMin|currentPrice|current_price)"\s*:\s*"?(\d+(?:[.,]\d{1,2})?)"?/i);
+  if (preco && !dados.precoAtual) {
+    let valor = Number(preco[1].replace(",", "."));
+    if (/price_min|priceMin/i.test(preco[0]) && valor > 10000) valor /= 100000;
+    if (valor > 0 && valor < 100000) dados.precoAtual = normalizarPreco(valor);
+  }
+}
+class ColetorImagem {
+  constructor(destino) { this.destino = destino; }
+  element(elemento) {
+    for (const atributo of ["src", "data-src", "data-original", "data-lazy-src"]) {
+      const imagem = elemento.getAttribute(atributo);
+      if (imagem && /susercontent\.com|shopee|amazon|mlstatic/i.test(imagem)) {
+        this.destino.imagens.add(imagem);
+        break;
+      }
+    }
+  }
+}
+
 async function buscarPagina(url) {
   const resposta = await fetch(url.toString(), {
     redirect: "follow",
@@ -346,9 +372,11 @@ async function extrairDados(resposta, urlOriginal) {
   const urlFinal = validarUrl(resposta.url || urlOriginal.toString());
   dados.loja = detectarLoja(urlFinal) || detectarLoja(urlOriginal);
 
+  extrairDadosEmbutidos(await resposta.clone().text(), dados);
   await new HTMLRewriter()
     .on("meta", new ColetorMeta(dados))
     .on("title", new ColetorTitulo(dados))
+    .on("img", new ColetorImagem(dados))
     .on('script[type="application/ld+json"]', new ColetorJsonLd(dados))
     .transform(resposta)
     .arrayBuffer();
