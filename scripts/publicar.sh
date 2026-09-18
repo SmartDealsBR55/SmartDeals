@@ -8,6 +8,8 @@ npm run build
 cp dist/index.source.html index.html
 cp dist/pages/login.source.html pages/login.html
 cp dist/pages/admin.source.html pages/admin.html
+cp dist/pages/politica.source.html pages/politica.html
+cp dist/pages/quem-somos.source.html pages/quem-somos.html
 cp -a dist/assets/. assets/
 
 rm -f SmartDeals-atualizacao.zip SmartDeals-painel-celular.zip SmartDeals-correcao-importacao.zip SmartDeals-categorias-compactas.zip SmartDeals-sem-rolagem-lateral.zip SmartDeals-ajuste-largura.zip

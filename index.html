@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7481329300539514" crossorigin="anonymous"></script>
 
   <meta
     name="viewport"
@@ -16,12 +15,17 @@
 
   <title>SmartDeals | Ofertas e Achados</title>
 
-  <script type="module" crossorigin src="./assets/main-C68FUYLC.js"></script>
+  <script type="module" crossorigin src="./assets/main-CNtfbZQa.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/firebase-DYvFj7oz.js">
-  <link rel="stylesheet" crossorigin href="./assets/main-DAV9oGTJ.css">
+  <link rel="stylesheet" crossorigin href="./assets/style-UlrXIVcG.css">
 </head>
 
 <body>
+
+  <aside class="aviso-desenvolvimento" id="aviso-desenvolvimento" role="status" hidden>
+    <p><strong>Site em desenvolvimento.</strong> Algumas funções podem apresentar erros e ofertas podem mudar. Confira os detalhes na loja antes de comprar.</p>
+    <button type="button" id="fechar-aviso-desenvolvimento" aria-label="Fechar aviso">Entendi</button>
+  </aside>
 
   <header>
 
@@ -61,8 +65,8 @@
       <a href="#lojas">Lojas</a>
 
       <div class="nav-categorias">
-        <button type="button" class="nav-categorias-botao" aria-expanded="false">Categorias <span>⌄</span></button>
-        <div class="nav-categorias-menu" aria-label="Categorias do SmartDeals">
+        <button type="button" class="nav-categorias-botao" aria-expanded="false" aria-controls="menu-categorias">Categorias <span>⌄</span></button>
+        <div class="nav-categorias-menu" id="menu-categorias" aria-label="Categorias do SmartDeals">
           <button type="button" class="category-card" data-categoria="">Todas as categorias</button>
           <button type="button" class="category-card" data-categoria="Eletrônicos">Eletrônicos</button>
           <button type="button" class="category-card" data-categoria="Informática">Informática</button>
@@ -425,6 +429,7 @@
     <strong>SmartDeals</strong>
     <p>Reunimos ofertas e levamos você à loja responsável pela venda. Alguns links são de afiliados e podem gerar comissão para o SmartDeals.</p>
     <p>Confira preço, frete e condições atualizados diretamente na loja antes de comprar.</p>
+    <p class="footer-links"><a href="pages/quem-somos.html">Quem somos</a><a href="pages/politica.html">Política do site e privacidade</a></p>
   </footer>
 
 

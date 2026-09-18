@@ -9,6 +9,8 @@ export default defineConfig({
         main: resolve(import.meta.dirname, 'index.source.html'),
         admin: resolve(import.meta.dirname, 'pages/admin.source.html'),
         login: resolve(import.meta.dirname, 'pages/login.source.html'),
+        politica: resolve(import.meta.dirname, 'pages/politica.source.html'),
+        quemSomos: resolve(import.meta.dirname, 'pages/quem-somos.source.html'),
       },
     },
   },

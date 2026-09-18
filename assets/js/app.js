@@ -25,6 +25,22 @@ const botaoPesquisa = document.querySelector(
   "#botao-pesquisa"
 );
 
+const avisoDesenvolvimento = document.getElementById("aviso-desenvolvimento");
+const botaoFecharAviso = document.getElementById("fechar-aviso-desenvolvimento");
+
+try {
+  if (avisoDesenvolvimento && sessionStorage.getItem("smartdeals-aviso-v1") !== "fechado") {
+    avisoDesenvolvimento.hidden = false;
+  }
+} catch {
+  if (avisoDesenvolvimento) avisoDesenvolvimento.hidden = false;
+}
+
+botaoFecharAviso?.addEventListener("click", () => {
+  avisoDesenvolvimento.hidden = true;
+  try { sessionStorage.setItem("smartdeals-aviso-v1", "fechado"); } catch { /* armazenamento indisponível */ }
+});
+
 const cardsLojas = document.querySelectorAll(
   ".store-card"
 );
@@ -32,6 +48,49 @@ const cardsLojas = document.querySelectorAll(
 const cardsCategorias = document.querySelectorAll(
   ".category-card"
 );
+
+const navCategorias = document.querySelector(".nav-categorias");
+const botaoMenuCategorias = document.querySelector(".nav-categorias-botao");
+const menuCategorias = document.getElementById("menu-categorias");
+const cabecalho = document.querySelector("header");
+
+function fecharMenuCategorias() {
+  navCategorias?.classList.remove("is-open");
+  menuCategorias?.classList.remove("is-open");
+  botaoMenuCategorias?.setAttribute("aria-expanded", "false");
+}
+
+function ajustarMenuCategorias() {
+  if (!menuCategorias || !navCategorias || !cabecalho) return;
+  fecharMenuCategorias();
+  if (window.matchMedia("(max-width: 760px)").matches) {
+    // O menu deve ficar fora da navegação horizontal, que corta seu conteúdo.
+    cabecalho.append(menuCategorias);
+  } else {
+    navCategorias.append(menuCategorias);
+  }
+}
+
+botaoMenuCategorias?.addEventListener("click", () => {
+  const abrir = botaoMenuCategorias.getAttribute("aria-expanded") !== "true";
+  fecharMenuCategorias();
+  if (abrir) {
+    navCategorias.classList.add("is-open");
+    menuCategorias.classList.add("is-open");
+    botaoMenuCategorias.setAttribute("aria-expanded", "true");
+  }
+});
+
+document.addEventListener("click", (evento) => {
+  if (!navCategorias?.contains(evento.target) && !menuCategorias?.contains(evento.target)) {
+    fecharMenuCategorias();
+  }
+});
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape") fecharMenuCategorias();
+});
+window.addEventListener("resize", ajustarMenuCategorias);
+ajustarMenuCategorias();
 
 const filtrosAtivos = document.querySelector(
   "#filtros-ativos"
@@ -1014,6 +1073,10 @@ cardsCategorias.forEach((card) => {
       card.dataset.categoria || "";
 
     aplicarFiltros();
+    if (menuCategorias?.contains(card)) {
+      fecharMenuCategorias();
+      document.getElementById("achados")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   });
 });
 
@@ -1108,7 +1171,7 @@ const campoPesquisaSticky = document.getElementById("campo-pesquisa-sticky");
 const botaoPesquisaSticky = document.getElementById("botao-pesquisa-sticky");
 
 function atualizarVisibilidadePesquisaSticky() {
-  if (!buscaHero || !buscaSticky || window.innerWidth < 1100) {
+  if (!buscaHero || !buscaSticky || (window.innerWidth > 760 && window.innerWidth < 1100)) {
     document.body.classList.remove("header-search-visible");
     buscaSticky?.setAttribute("aria-hidden", "true");
     return;
@@ -1120,6 +1183,7 @@ function atualizarVisibilidadePesquisaSticky() {
 
   document.body.classList.toggle("header-search-visible", mostrar);
   buscaSticky.setAttribute("aria-hidden", mostrar ? "false" : "true");
+  if (mostrar) fecharMenuCategorias();
 
   if (mostrar && document.activeElement !== campoPesquisaSticky) {
     campoPesquisaSticky.value = campoPesquisa.value;
