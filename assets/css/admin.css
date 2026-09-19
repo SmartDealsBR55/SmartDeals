@@ -1038,3 +1038,146 @@ form > button:hover:not(:disabled),
   .acoes-formulario { display: grid; gap: 10px; }
   #botao-publicar { width: 100%; min-height: 52px; }
 }
+
+/* Painel confortável em celulares, inclusive quando o navegador usa
+   uma viewport mais larga no modo "site para computador". */
+@media (max-width: 1100px) {
+  body {
+    background: var(--fundo);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .admin-header {
+    min-height: 64px;
+    padding: 10px 14px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .admin-header > div { min-width: 0; }
+  .admin-header h1 { font-size: clamp(1.05rem, 4vw, 1.3rem); }
+  .admin-header p { display: none; }
+  .admin-header a {
+    min-height: 44px;
+    margin-left: auto;
+    padding: 11px 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: .9rem;
+    white-space: nowrap;
+  }
+
+  .admin-container {
+    width: 100%;
+    padding: 12px 10px 80px;
+    gap: 16px;
+  }
+
+  .admin-card {
+    padding: 18px 14px;
+    border-radius: 16px;
+    box-shadow: none;
+  }
+
+  .admin-card h2 { font-size: 1.3rem; }
+  .admin-card-heading,
+  .products-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .admin-card-heading p,
+  .products-header p,
+  .campos-essenciais > p,
+  .importador-produto-cabecalho p {
+    font-size: .95rem;
+    line-height: 1.5;
+  }
+
+  .importador-produto {
+    margin-top: 16px;
+    padding: 15px;
+    border-radius: 14px;
+  }
+
+  .importador-produto-cabecalho,
+  .importador-produto-acoes {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .importador-badge { display: none; }
+  #botao-buscar-informacoes { width: 100%; min-height: 50px; }
+
+  .form-grid {
+    margin-top: 16px;
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .campo-completo { grid-column: auto; }
+  label { gap: 7px; font-size: .95rem; }
+  input, select, textarea {
+    min-height: 50px;
+    padding: 13px 14px;
+    font-size: 16px;
+  }
+  textarea { line-height: 1.5; }
+  #imagens { min-height: 120px; }
+
+  .detalhes-opcionais { padding: 15px; }
+  .acoes-formulario { display: grid; gap: 10px; }
+  #botao-publicar { width: 100%; min-height: 54px; }
+  #botao-cancelar-edicao { width: 100%; min-height: 48px; }
+
+  .products-header > div:last-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .botao-secundario { width: 100%; min-height: 48px; }
+
+  #lista-produtos { margin-top: 18px; gap: 14px; }
+  .admin-product {
+    padding: 12px;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    border-radius: 14px;
+  }
+  .admin-product-info {
+    width: 100%;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .admin-product-imagem {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 7;
+  }
+  .admin-product h3 {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 1rem;
+    line-height: 1.35;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .admin-product p { font-size: .9rem; line-height: 1.45; }
+  .admin-product-acoes { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+  .admin-product-acoes button { min-height: 48px; }
+}
+
+@media (max-width: 430px) {
+  .admin-container { padding-inline: 8px; }
+  .admin-card { padding-inline: 12px; }
+  .products-header > div:last-child,
+  .admin-product-acoes { grid-template-columns: 1fr; }
+  .admin-product-imagem { aspect-ratio: 16 / 8; }
+}

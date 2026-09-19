@@ -83,6 +83,26 @@ const URL_IMPORTADOR_PRODUTOS =
 
 let produtos = [];
 let produtoEmEdicao = null;
+let linkDaUltimaBusca = "";
+
+function limparDadosDaBuscaAnterior() {
+  if (produtoEmEdicao) return;
+
+  for (const seletor of [
+    "#nome", "#loja", "#categoria", "#preco-atual", "#preco-antigo",
+    "#imagens", "#parcelas", "#avaliacao", "#economia", "#score", "#badge"
+  ]) {
+    definirValor(seletor, "");
+  }
+
+  esconderResultadoImportacao();
+}
+
+function nomeDeProdutoValido(nome) {
+  const texto = String(nome || "").trim();
+  if (/^temu\s*:\s*compre como um bilion[aá]rio\b/i.test(texto)) return "";
+  return texto;
+}
 
 /* =========================
    AUTENTICAÇÃO
@@ -486,7 +506,7 @@ function preencherSelectSeVazio(seletor, valor) {
 function aplicarDadosImportados(dados) {
   const preenchidos = [];
 
-  if (preencherSeVazio("#nome", dados.nome)) {
+  if (preencherSeVazio("#nome", nomeDeProdutoValido(dados.nome))) {
     preenchidos.push("nome");
   }
 
@@ -562,6 +582,11 @@ async function buscarInformacoesProduto() {
     return;
   }
 
+  if (linkDaUltimaBusca && link !== linkDaUltimaBusca) {
+    limparDadosDaBuscaAnterior();
+  }
+  linkDaUltimaBusca = link;
+
   if (URL_IMPORTADOR_PRODUTOS.includes("COLE_AQUI")) {
     mostrarResultadoImportacao(
       "O importador ainda não foi conectado. Publique o Worker e cole a URL dele no arquivo admin.js.",
@@ -590,6 +615,10 @@ async function buscarInformacoesProduto() {
     });
 
     const retorno = await resposta.json().catch(() => ({}));
+
+    if (obterValor("#link") !== link) {
+      return;
+    }
 
     if (!resposta.ok) {
       throw new Error(
@@ -820,6 +849,7 @@ function ativarModoEdicao(produto) {
 
 function cancelarEdicao() {
   produtoEmEdicao = null;
+  linkDaUltimaBusca = "";
   produtoId.value = "";
 
   formulario.reset();
@@ -1236,6 +1266,13 @@ botaoBuscarInformacoes?.addEventListener(
   "click",
   buscarInformacoesProduto
 );
+
+obterElemento("#link")?.addEventListener("input", () => {
+  if (linkDaUltimaBusca && obterValor("#link") !== linkDaUltimaBusca) {
+    limparDadosDaBuscaAnterior();
+    linkDaUltimaBusca = "";
+  }
+});
 
 obterElemento("#nome")?.addEventListener("blur", () => {
   if (obterValor("#categoria")) return;
