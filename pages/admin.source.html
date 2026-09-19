@@ -172,25 +172,45 @@
             >
           </label>
 
-          <label class="campo-completo">
-            Imagens do produto
+          <div class="campo-completo campo-imagens">
+            <div class="campo-imagens-cabecalho">
+              <div>
+                <h3>Imagens do produto</h3>
+                <p>Escolha fotos da galeria ou dos arquivos do celular.</p>
+              </div>
+              <span id="contador-imagens">0 de 8 imagens</span>
+            </div>
 
-            <textarea
-              id="imagens"
-              rows="6"
-              required
-              placeholder="Cole uma imagem por linha:
+            <input
+              id="arquivos-imagens"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              multiple
+              hidden
+            >
 
-https://site.com/foto1.jpg
-https://site.com/foto2.jpg
-https://site.com/foto3.jpg"
-            ></textarea>
+            <button
+              id="botao-selecionar-imagens"
+              type="button"
+            >
+              Escolher imagens do celular
+            </button>
 
-            <small>
-              Coloque uma URL de imagem em cada linha.
-              A primeira será usada como imagem principal.
+            <textarea id="imagens" hidden></textarea>
+
+            <div
+              id="previsualizacao-imagens"
+              class="previsualizacao-imagens"
+              aria-live="polite"
+            >
+              <p class="mensagem-sem-imagens">Nenhuma imagem selecionada.</p>
+            </div>
+
+            <small class="ajuda-imagens">
+              Você pode escolher até 8 imagens JPG, PNG, WebP ou AVIF.
+              A primeira será a imagem principal. Fotos encontradas pelo importador também aparecem aqui.
             </small>
-          </label>
+          </div>
           </div>
         </div>
 

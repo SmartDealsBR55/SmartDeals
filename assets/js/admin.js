@@ -1,4 +1,4 @@
-import { db, auth } from "./firebase.js";
+import { db, auth, storage } from "./firebase.js";
 
 import {
   addDoc,
@@ -15,6 +15,12 @@ import {
 import {
   onAuthStateChanged
 } from "firebase/auth";
+
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes
+} from "firebase/storage";
 
 /* =========================
    ELEMENTOS DA PÁGINA
@@ -74,6 +80,11 @@ const resultadoImportacao = document.querySelector(
   "#resultado-importacao"
 );
 
+const campoArquivosImagens = document.querySelector("#arquivos-imagens");
+const botaoSelecionarImagens = document.querySelector("#botao-selecionar-imagens");
+const previsualizacaoImagens = document.querySelector("#previsualizacao-imagens");
+const contadorImagens = document.querySelector("#contador-imagens");
+
 /*
  * Depois de publicar o Cloudflare Worker, cole a URL aqui.
  * Exemplo: https://smartdeals-importador.seuusuario.workers.dev
@@ -84,6 +95,10 @@ const URL_IMPORTADOR_PRODUTOS =
 let produtos = [];
 let produtoEmEdicao = null;
 let linkDaUltimaBusca = "";
+let arquivosImagensSelecionados = [];
+
+const LIMITE_IMAGENS = 8;
+const TAMANHO_MAXIMO_IMAGEM = 10 * 1024 * 1024;
 
 function limparDadosDaBuscaAnterior() {
   if (produtoEmEdicao) return;
@@ -94,6 +109,9 @@ function limparDadosDaBuscaAnterior() {
   ]) {
     definirValor(seletor, "");
   }
+
+  arquivosImagensSelecionados = [];
+  atualizarPrevisualizacaoImagens();
 
   esconderResultadoImportacao();
 }
@@ -559,7 +577,8 @@ function aplicarDadosImportados(dados) {
     : [];
 
   if (imagens.length > 0 && !obterValor("#imagens")) {
-    definirValor("#imagens", imagens.join("\n"));
+    definirValor("#imagens", imagens.slice(0, LIMITE_IMAGENS).join("\n"));
+    atualizarPrevisualizacaoImagens();
     preenchidos.push(
       `${imagens.length} imagem${imagens.length === 1 ? "" : "s"}`
     );
@@ -692,6 +711,119 @@ function obterImagensProduto(produto) {
   return [];
 }
 
+function atualizarPrevisualizacaoImagens() {
+  if (!previsualizacaoImagens) return;
+
+  const imagensSalvas = obterImagensDoFormulario();
+  const total = imagensSalvas.length + arquivosImagensSelecionados.length;
+
+  if (contadorImagens) {
+    contadorImagens.textContent = `${total} de ${LIMITE_IMAGENS} imagens`;
+  }
+
+  if (total === 0) {
+    previsualizacaoImagens.innerHTML =
+      '<p class="mensagem-sem-imagens">Nenhuma imagem selecionada.</p>';
+    return;
+  }
+
+  const itensSalvos = imagensSalvas.map((url, indice) => ({
+    url,
+    tipo: "url",
+    indice,
+    nome: `Imagem ${indice + 1}`
+  }));
+
+  const itensNovos = arquivosImagensSelecionados.map((arquivo, indice) => ({
+    url: URL.createObjectURL(arquivo),
+    tipo: "arquivo",
+    indice,
+    nome: arquivo.name,
+    temporaria: true
+  }));
+
+  previsualizacaoImagens.innerHTML = [...itensSalvos, ...itensNovos]
+    .map((item, indiceGeral) => `
+      <div class="preview-imagem ${indiceGeral === 0 ? "preview-imagem-principal" : ""}">
+        <img src="${escaparHtml(item.url)}" alt="${escaparHtml(item.nome)}">
+        <button
+          class="botao-remover-imagem"
+          type="button"
+          data-tipo="${item.tipo}"
+          data-indice="${item.indice}"
+          aria-label="Remover ${escaparHtml(item.nome)}"
+          title="Remover imagem"
+        >×</button>
+      </div>
+    `).join("");
+
+  if (itensNovos.length) {
+    previsualizacaoImagens.querySelectorAll('img[src^="blob:"]').forEach((imagem) => {
+      imagem.addEventListener("load", () => URL.revokeObjectURL(imagem.src), { once: true });
+    });
+  }
+}
+
+function selecionarArquivosImagens(listaArquivos) {
+  const imagensSalvas = obterImagensDoFormulario();
+  const vagas = LIMITE_IMAGENS - imagensSalvas.length - arquivosImagensSelecionados.length;
+  const arquivos = Array.from(listaArquivos || []);
+
+  if (vagas <= 0) {
+    mostrarMensagem(`O limite é de ${LIMITE_IMAGENS} imagens por produto.`);
+    return;
+  }
+
+  const imagensValidas = arquivos.filter((arquivo) => {
+    if (!arquivo.type.startsWith("image/")) return false;
+    if (arquivo.size > TAMANHO_MAXIMO_IMAGEM) return false;
+    return true;
+  });
+
+  if (imagensValidas.length !== arquivos.length) {
+    mostrarMensagem("Alguns arquivos não foram adicionados. Use imagens de até 10 MB.");
+  } else {
+    esconderMensagem();
+  }
+
+  arquivosImagensSelecionados.push(...imagensValidas.slice(0, vagas));
+
+  if (imagensValidas.length > vagas) {
+    mostrarMensagem(`Foram adicionadas apenas ${vagas} imagens para respeitar o limite de ${LIMITE_IMAGENS}.`);
+  }
+
+  if (campoArquivosImagens) campoArquivosImagens.value = "";
+  atualizarPrevisualizacaoImagens();
+}
+
+function extensaoDaImagem(arquivo) {
+  const extensoes = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/avif": "avif"
+  };
+
+  return extensoes[arquivo.type] || "jpg";
+}
+
+async function enviarImagensSelecionadas() {
+  const usuario = auth.currentUser;
+  if (!usuario) throw new Error("Sua sessão expirou. Entre novamente para enviar as imagens.");
+
+  const urls = [];
+  for (let indice = 0; indice < arquivosImagensSelecionados.length; indice += 1) {
+    const arquivo = arquivosImagensSelecionados[indice];
+    botaoPublicar.textContent = `Enviando imagem ${indice + 1}/${arquivosImagensSelecionados.length}...`;
+    const identificador = crypto.randomUUID?.() || `${Date.now()}-${indice}`;
+    const caminho = `produtos/${usuario.uid}/${identificador}.${extensaoDaImagem(arquivo)}`;
+    const referencia = ref(storage, caminho);
+    await uploadBytes(referencia, arquivo, { contentType: arquivo.type });
+    urls.push(await getDownloadURL(referencia));
+  }
+  return urls;
+}
+
 /* =========================
    MONTAGEM E VALIDAÇÃO
 ========================= */
@@ -758,7 +890,7 @@ function validarProduto(produto) {
     return false;
   }
 
-  if (produto.imagens.length === 0) {
+  if (produto.imagens.length === 0 && arquivosImagensSelecionados.length === 0) {
     mostrarMensagem(
       "Adicione pelo menos uma imagem do produto."
     );
@@ -823,6 +955,8 @@ function ativarModoEdicao(produto) {
     "#imagens",
     imagens.join("\n")
   );
+  arquivosImagensSelecionados = [];
+  atualizarPrevisualizacaoImagens();
 
   tituloFormulario.textContent =
     "Editar produto";
@@ -853,6 +987,9 @@ function cancelarEdicao() {
   produtoId.value = "";
 
   formulario.reset();
+  arquivosImagensSelecionados = [];
+  definirValor("#imagens", "");
+  atualizarPrevisualizacaoImagens();
 
   tituloFormulario.textContent =
     "Novo produto";
@@ -913,6 +1050,12 @@ async function salvarProduto(evento) {
       ? "Salvando..."
       : "Publicando...";
 
+    if (arquivosImagensSelecionados.length > 0) {
+      const novasImagens = await enviarImagensSelecionadas();
+      produto.imagens = [...produto.imagens, ...novasImagens].slice(0, LIMITE_IMAGENS);
+      produto.imagem = produto.imagens[0] || "";
+    }
+
     if (estaEditando) {
       await atualizarProduto(
         idEmEdicao,
@@ -939,9 +1082,9 @@ async function salvarProduto(evento) {
     );
 
     mostrarMensagem(
-      estaEditando
+      erro.message || (estaEditando
         ? "Não foi possível atualizar o produto."
-        : "Não foi possível publicar o produto."
+        : "Não foi possível publicar o produto.")
     );
   } finally {
     botaoPublicar.disabled = false;
@@ -1267,6 +1410,29 @@ botaoBuscarInformacoes?.addEventListener(
   buscarInformacoesProduto
 );
 
+botaoSelecionarImagens?.addEventListener("click", () => {
+  campoArquivosImagens?.click();
+});
+
+campoArquivosImagens?.addEventListener("change", () => {
+  selecionarArquivosImagens(campoArquivosImagens.files);
+});
+
+previsualizacaoImagens?.addEventListener("click", (evento) => {
+  const botao = evento.target.closest(".botao-remover-imagem");
+  if (!botao) return;
+
+  const indice = Number(botao.dataset.indice);
+  if (botao.dataset.tipo === "arquivo") {
+    arquivosImagensSelecionados.splice(indice, 1);
+  } else {
+    const imagens = obterImagensDoFormulario();
+    imagens.splice(indice, 1);
+    definirValor("#imagens", imagens.join("\n"));
+  }
+  atualizarPrevisualizacaoImagens();
+});
+
 obterElemento("#link")?.addEventListener("input", () => {
   if (linkDaUltimaBusca && obterValor("#link") !== linkDaUltimaBusca) {
     limparDadosDaBuscaAnterior();
@@ -1299,3 +1465,5 @@ botaoAtualizarProdutos.addEventListener(
   "click",
   carregarProdutos
 );
+
+atualizarPrevisualizacaoImagens();
