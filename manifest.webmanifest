@@ -1,0 +1,26 @@
+{
+  "name": "SmartDeals IA",
+  "short_name": "SmartDeals IA",
+  "description": "Aplicativo administrativo para publicar ofertas no SmartDeals.",
+  "lang": "pt-BR",
+  "start_url": "./pages/admin.html?origem=app",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0a07",
+  "theme_color": "#0b0a07",
+  "icons": [
+    {"src":"./assets/icons/smartdeals-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./assets/icons/smartdeals-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ],
+  "shortcuts": [
+    {"name":"Publicar produto","short_name":"Publicar","url":"./pages/admin.html#form-produto"},
+    {"name":"Ver site","short_name":"Ofertas","url":"./index.html"}
+  ],
+  "share_target": {
+    "action": "./pages/admin.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {"title":"title","text":"text","url":"url"}
+  }
+}

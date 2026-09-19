@@ -15,6 +15,10 @@
 
   <title>Painel Administrativo | SmartDeals</title>
 
+  <meta name="theme-color" content="#0b0a07">
+  <link rel="manifest" href="/SmartDeals/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/SmartDeals/assets/icons/smartdeals-192.png">
+
   <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 
@@ -26,9 +30,10 @@
       <p>Publique e gerencie suas ofertas</p>
     </div>
 
-    <a href="../index.html">
-      Voltar ao site
-    </a>
+    <div class="admin-header-acoes">
+      <button id="botao-instalar-app" type="button">Instalar app</button>
+      <a href="../index.html">Voltar ao site</a>
+    </div>
   </header>
 
   <main class="admin-container">
@@ -408,6 +413,8 @@
     type="module"
     src="../assets/js/admin.js"
   ></script>
+
+  <script type="module" src="../assets/js/pwa.js"></script>
 
 </body>
 </html>

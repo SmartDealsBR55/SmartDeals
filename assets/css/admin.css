@@ -829,6 +829,22 @@ form > button:hover:not(:disabled),
     height: 180px;
   }
 }
+
+.admin-header-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#botao-instalar-app {
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  color: #111111;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+}
 /* =========================
    IMPORTADOR POR LINK
 ========================= */
@@ -1108,6 +1124,15 @@ form > button:hover:not(:disabled),
   .importador-produto-acoes {
     grid-template-columns: 1fr;
     flex-direction: column;
+  }
+
+  .admin-header-acoes {
+    width: 100%;
+  }
+
+  .admin-header-acoes > * {
+    flex: 1;
+    text-align: center;
   }
 
   .importador-badge { display: none; }
