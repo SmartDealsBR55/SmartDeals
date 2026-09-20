@@ -775,6 +775,27 @@ main {
   background: rgba(255, 255, 255, 0.025);
 }
 
+.carregar-mais-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+#botao-carregar-mais {
+  min-width: 230px;
+  min-height: 50px;
+  padding: 13px 24px;
+  border: 1px solid var(--cor-dourada);
+  border-radius: 14px;
+  color: #111111;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--cor-dourada), var(--cor-dourada-clara));
+}
+
+#botao-carregar-mais:disabled {
+  opacity: 0.6;
+}
+
 
 
 /* =========================

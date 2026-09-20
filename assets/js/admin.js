@@ -1006,6 +1006,31 @@ function validarProduto(produto) {
   return true;
 }
 
+function normalizarLinkParaComparacao(valor) {
+  try {
+    const url = new URL(String(valor || "").trim());
+    url.hash = "";
+    return url.toString().replace(/\/$/, "").toLowerCase();
+  } catch {
+    return String(valor || "").trim().replace(/\/$/, "").toLowerCase();
+  }
+}
+
+function encontrarProdutoDuplicado(produto) {
+  const link = normalizarLinkParaComparacao(produto.link);
+  const nome = normalizarTextoCategoria(produto.nome);
+  const loja = normalizarTextoCategoria(produto.loja);
+
+  return produtos.find((existente) => {
+    if (existente.id === produtoEmEdicao?.id) return false;
+    const mesmoLink = link && normalizarLinkParaComparacao(existente.link) === link;
+    const mesmoProduto = nome
+      && normalizarTextoCategoria(existente.nome) === nome
+      && normalizarTextoCategoria(existente.loja) === loja;
+    return mesmoLink || mesmoProduto;
+  });
+}
+
 /* =========================
    NOVO PRODUTO / EDIÇÃO
 ========================= */
@@ -1147,6 +1172,13 @@ async function salvarProduto(evento) {
   const produto = montarProduto();
 
   if (!validarProduto(produto)) {
+    return;
+  }
+
+  const duplicado = encontrarProdutoDuplicado(produto);
+  if (duplicado) {
+    mostrarMensagem(`Esse produto já está cadastrado: ${duplicado.nome}`);
+    duplicado.id && document.querySelector(`[data-id="${duplicado.id}"]`)?.scrollIntoView({ behavior: "smooth" });
     return;
   }
 

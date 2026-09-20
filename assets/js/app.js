@@ -3,8 +3,10 @@ import { db } from "./firebase.js";
 import {
   collection,
   getDocs,
+  limit,
   orderBy,
-  query
+  query,
+  startAfter
 } from "firebase/firestore";
 
 /* =========================
@@ -112,6 +114,8 @@ const descricaoProdutos = document.querySelector(
   "#descricao-produtos"
 );
 
+const botaoCarregarMais = document.querySelector("#botao-carregar-mais");
+
 /* =========================
    ESTADO DA PÁGINA
 ========================= */
@@ -122,6 +126,10 @@ let intervalosCarrosseis = [];
 let lojaSelecionada = "";
 let categoriaSelecionada = "";
 let termoPesquisa = "";
+let ultimoDocumento = null;
+let carregandoPagina = false;
+let chegouAoFim = false;
+const PRODUTOS_POR_PAGINA = 24;
 
 /* =========================
    FUNÇÕES GERAIS
@@ -347,25 +355,41 @@ function produtoAindaEstaAtivo(produto) {
   return Number.isNaN(data.getTime()) || data.getTime() > Date.now();
 }
 
-async function carregarProdutos() {
-  try {
-    mensagemProdutos.hidden = false;
-    mensagemProdutos.textContent =
-      "Carregando produtos...";
+async function carregarProdutos(reiniciar = true) {
+  if (carregandoPagina || (!reiniciar && chegouAoFim)) return;
 
-    const consulta = query(
-      collection(db, "produtos"),
-      orderBy("criadoEm", "desc")
-    );
+  try {
+    carregandoPagina = true;
+    botaoCarregarMais.disabled = true;
+    botaoCarregarMais.textContent = "Carregando...";
+
+    if (reiniciar) {
+      produtos = [];
+      ultimoDocumento = null;
+      chegouAoFim = false;
+      mensagemProdutos.hidden = false;
+      mensagemProdutos.textContent = "Carregando produtos...";
+    }
+
+    const restricoes = [orderBy("criadoEm", "desc")];
+    if (ultimoDocumento) restricoes.push(startAfter(ultimoDocumento));
+    restricoes.push(limit(PRODUTOS_POR_PAGINA));
+
+    const consulta = query(collection(db, "produtos"), ...restricoes);
 
     const resultado = await getDocs(consulta);
+    ultimoDocumento = resultado.docs.at(-1) || ultimoDocumento;
+    chegouAoFim = resultado.size < PRODUTOS_POR_PAGINA;
 
-    produtos = resultado.docs.map((documento) => ({
+    const novosProdutos = resultado.docs.map((documento) => ({
       id: documento.id,
       ...documento.data()
     })).filter(produtoAindaEstaAtivo);
 
+    produtos.push(...novosProdutos);
+
     aplicarFiltros(false);
+    botaoCarregarMais.hidden = chegouAoFim;
   } catch (erro) {
     console.error(
       "Erro ao carregar produtos:",
@@ -375,6 +399,10 @@ async function carregarProdutos() {
     mensagemProdutos.hidden = false;
     mensagemProdutos.textContent =
       "Não foi possível carregar os produtos do Firebase.";
+  } finally {
+    carregandoPagina = false;
+    botaoCarregarMais.disabled = false;
+    botaoCarregarMais.textContent = "Carregar mais produtos";
   }
 }
 
@@ -1165,6 +1193,8 @@ botaoLimparFiltros?.addEventListener(
   "click",
   limparTodosFiltros
 );
+
+botaoCarregarMais?.addEventListener("click", () => carregarProdutos(false));
 
 /* =========================
    INICIALIZAÇÃO
