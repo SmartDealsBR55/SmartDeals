@@ -19,7 +19,7 @@ import {
 import {
   getDownloadURL,
   ref,
-  uploadBytes
+  uploadBytesResumable
 } from "firebase/storage";
 
 /* =========================
@@ -98,7 +98,8 @@ let linkDaUltimaBusca = "";
 let arquivosImagensSelecionados = [];
 
 const LIMITE_IMAGENS = 8;
-const TAMANHO_MAXIMO_IMAGEM = 10 * 1024 * 1024;
+const DIMENSAO_MAXIMA_IMAGEM = 1920;
+const TEMPO_LIMITE_UPLOAD = 120000;
 
 function limparDadosDaBuscaAnterior() {
   if (produtoEmEdicao) return;
@@ -774,14 +775,10 @@ function selecionarArquivosImagens(listaArquivos) {
     return;
   }
 
-  const imagensValidas = arquivos.filter((arquivo) => {
-    if (!arquivo.type.startsWith("image/")) return false;
-    if (arquivo.size > TAMANHO_MAXIMO_IMAGEM) return false;
-    return true;
-  });
+  const imagensValidas = arquivos.filter((arquivo) => arquivo.type.startsWith("image/"));
 
   if (imagensValidas.length !== arquivos.length) {
-    mostrarMensagem("Alguns arquivos não foram adicionados. Use imagens de até 10 MB.");
+    mostrarMensagem("Alguns arquivos não foram adicionados porque não são imagens.");
   } else {
     esconderMensagem();
   }
@@ -807,18 +804,80 @@ function extensaoDaImagem(arquivo) {
   return extensoes[arquivo.type] || "jpg";
 }
 
+async function compactarImagem(arquivo) {
+  try {
+    const bitmap = await createImageBitmap(arquivo);
+    const escala = Math.min(1, DIMENSAO_MAXIMA_IMAGEM / Math.max(bitmap.width, bitmap.height));
+    const largura = Math.max(1, Math.round(bitmap.width * escala));
+    const altura = Math.max(1, Math.round(bitmap.height * escala));
+    const canvas = document.createElement("canvas");
+    canvas.width = largura;
+    canvas.height = altura;
+    const contexto = canvas.getContext("2d", { alpha: false });
+    contexto.fillStyle = "#ffffff";
+    contexto.fillRect(0, 0, largura, altura);
+    contexto.drawImage(bitmap, 0, 0, largura, altura);
+    bitmap.close?.();
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (resultado) => resultado ? resolve(resultado) : reject(new Error("Falha ao preparar a imagem.")),
+        "image/webp",
+        0.82
+      );
+    });
+
+    return new File(
+      [blob],
+      `${arquivo.name.replace(/\.[^.]+$/, "")}.webp`,
+      { type: "image/webp", lastModified: Date.now() }
+    );
+  } catch (erro) {
+    console.warn("A imagem será enviada no formato original:", erro);
+    return arquivo;
+  }
+}
+
+function enviarArquivoComProgresso(referencia, arquivo, indice, total) {
+  return new Promise((resolve, reject) => {
+    const tarefa = uploadBytesResumable(referencia, arquivo, { contentType: arquivo.type });
+    const temporizador = setTimeout(() => {
+      tarefa.cancel();
+      reject(new Error("O envio demorou demais. Verifique a internet e toque em publicar novamente."));
+    }, TEMPO_LIMITE_UPLOAD);
+
+    tarefa.on(
+      "state_changed",
+      (snapshot) => {
+        const percentual = Math.max(1, Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        ));
+        botaoPublicar.textContent = `Imagem ${indice + 1}/${total}: ${percentual}%`;
+      },
+      (erro) => {
+        clearTimeout(temporizador);
+        reject(erro);
+      },
+      () => {
+        clearTimeout(temporizador);
+        resolve(tarefa.snapshot);
+      }
+    );
+  });
+}
+
 async function enviarImagensSelecionadas() {
   const usuario = auth.currentUser;
   if (!usuario) throw new Error("Sua sessão expirou. Entre novamente para enviar as imagens.");
 
   const urls = [];
   for (let indice = 0; indice < arquivosImagensSelecionados.length; indice += 1) {
-    const arquivo = arquivosImagensSelecionados[indice];
-    botaoPublicar.textContent = `Enviando imagem ${indice + 1}/${arquivosImagensSelecionados.length}...`;
+    botaoPublicar.textContent = `Preparando imagem ${indice + 1}/${arquivosImagensSelecionados.length}...`;
+    const arquivo = await compactarImagem(arquivosImagensSelecionados[indice]);
     const identificador = crypto.randomUUID?.() || `${Date.now()}-${indice}`;
     const caminho = `produtos/${usuario.uid}/${identificador}.${extensaoDaImagem(arquivo)}`;
     const referencia = ref(storage, caminho);
-    await uploadBytes(referencia, arquivo, { contentType: arquivo.type });
+    await enviarArquivoComProgresso(referencia, arquivo, indice, arquivosImagensSelecionados.length);
     urls.push(await getDownloadURL(referencia));
   }
   return urls;

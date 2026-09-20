@@ -1,5 +1,11 @@
 let eventoInstalacao = null;
 const botaoInstalar = document.querySelector("#botao-instalar-app");
+const instaladoComoAplicativo = window.matchMedia("(display-mode: standalone)").matches
+  || window.navigator.standalone === true;
+
+if (botaoInstalar && instaladoComoAplicativo) {
+  botaoInstalar.hidden = true;
+}
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
