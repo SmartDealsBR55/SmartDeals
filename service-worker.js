@@ -1,4 +1,4 @@
-const CACHE = "smartdeals-ia-v6";
+const CACHE = "smartdeals-ia-v9";
 const ESSENCIAIS = ["./", "./index.html", "./pages/admin.html", "./pages/login.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", (evento) => {

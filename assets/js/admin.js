@@ -99,8 +99,8 @@ let produtoEmEdicao = null;
 let linkDaUltimaBusca = "";
 let arquivosImagensSelecionados = [];
 
-const LIMITE_IMAGENS = 8;
-const DIMENSAO_MAXIMA_IMAGEM = 1920;
+const LIMITE_IMAGENS = 4;
+const DIMENSAO_MAXIMA_IMAGEM = 1000;
 const TEMPO_LIMITE_UPLOAD = 120000;
 
 function limparDadosDaBuscaAnterior() {
@@ -844,17 +844,19 @@ function enviarArquivoComProgresso(referencia, arquivo, indice, total) {
   return new Promise((resolve, reject) => {
     const tarefa = uploadBytesResumable(referencia, arquivo, { contentType: arquivo.type });
     const temporizador = setTimeout(() => {
+      reject(new Error("O armazenamento não concluiu o envio em 2 minutos. Confira no Firebase se o Storage está ativado, o bucket está correto e sua conta tem permissão. Os dados continuam no formulário."));
       tarefa.cancel();
-      reject(new Error("O envio demorou demais. Verifique a internet e toque em publicar novamente."));
     }, TEMPO_LIMITE_UPLOAD);
 
     tarefa.on(
       "state_changed",
       (snapshot) => {
-        const percentual = Math.max(1, Math.round(
+        const percentual = Math.max(0, Math.round(
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100
         ));
-        botaoPublicar.textContent = `Imagem ${indice + 1}/${total}: ${percentual}%`;
+        botaoPublicar.textContent = snapshot.bytesTransferred === 0
+          ? `Conectando ao armazenamento (${indice + 1}/${total})...`
+          : `Imagem ${indice + 1}/${total}: ${percentual}%`;
       },
       (erro) => {
         clearTimeout(temporizador);
@@ -868,19 +870,25 @@ function enviarArquivoComProgresso(referencia, arquivo, indice, total) {
   });
 }
 
-async function enviarImagensSelecionadas() {
-  const usuario = auth.currentUser;
-  if (!usuario) throw new Error("Sua sessão expirou. Entre novamente para enviar as imagens.");
+function arquivoParaDataUrl(arquivo) {
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = () => resolve(String(leitor.result));
+    leitor.onerror = () => reject(new Error("Não foi possível preparar uma das fotos."));
+    leitor.readAsDataURL(arquivo);
+  });
+}
 
+async function enviarImagensSelecionadas() {
   const urls = [];
   for (let indice = 0; indice < arquivosImagensSelecionados.length; indice += 1) {
     botaoPublicar.textContent = `Preparando imagem ${indice + 1}/${arquivosImagensSelecionados.length}...`;
     const arquivo = await compactarImagem(arquivosImagensSelecionados[indice]);
-    const identificador = crypto.randomUUID?.() || `${Date.now()}-${indice}`;
-    const caminho = `produtos/${usuario.uid}/${identificador}.${extensaoDaImagem(arquivo)}`;
-    const referencia = ref(storage, caminho);
-    await enviarArquivoComProgresso(referencia, arquivo, indice, arquivosImagensSelecionados.length);
-    urls.push(await getDownloadURL(referencia));
+    const url = await arquivoParaDataUrl(arquivo);
+    if (url.length > 180000) {
+      throw new Error("Uma foto ainda ficou grande demais. Escolha uma foto com menos detalhes ou faça um recorte antes de publicar.");
+    }
+    urls.push(url);
   }
   return urls;
 }
@@ -1726,6 +1734,19 @@ obterElemento("#botao-preencher-texto")?.addEventListener("click", () => {
 
 window.addEventListener("smartdeals:compartilhamento-recebido", (evento) => {
   aproveitarCompartilhamento(evento.detail);
+});
+
+window.addEventListener("smartdeals:print-conferido", (evento) => {
+  const { nome, preco } = evento.detail;
+  if (produtoEmEdicao) {
+    mostrarResultadoImportacao("Cancele a edição antes de usar um print de outro produto.");
+    return;
+  }
+  if ((obterValor("#nome") || obterValor("#preco-atual")) && !confirm("Substituir nome, preço e categoria pelos dados conferidos do print? Confira também o link e as fotos deste produto.")) return;
+  definirValor("#nome", nome);
+  definirValor("#preco-atual", preco);
+  selecionarOpcao("#categoria", normalizarCategoriaImportada("", nome));
+  mostrarResultadoImportacao("Dados do print aplicados. Confira a loja, o link de afiliado e as fotos antes de publicar.");
 });
 
 aproveitarCompartilhamento();

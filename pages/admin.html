@@ -19,8 +19,8 @@
   <link rel="manifest" href="/SmartDeals/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/SmartDeals/assets/icons/smartdeals-192.png">
 
-  <script type="module" crossorigin src="../assets/admin-1wP7tW5o.js"></script>
-  <link rel="modulepreload" crossorigin href="../assets/pwa-C4H7dP3f.js">
+  <script type="module" crossorigin src="../assets/admin-DmLLtbRm.js"></script>
+  <link rel="modulepreload" crossorigin href="../assets/pwa-CDN31CFQ.js">
   <link rel="stylesheet" crossorigin href="../assets/admin-U-o0sOMW.css">
 </head>
 
@@ -83,6 +83,19 @@
             </div>
 
             <span class="importador-badge">Automático</span>
+          </div>
+
+          <div class="importador-texto">
+            <label for="print-produto">Escanear print do produto</label>
+            <input id="print-produto" type="file" accept="image/png,image/jpeg,image/webp">
+            <button id="escanear-print" type="button">Ler print</button>
+            <p id="status-print" role="status">Selecione um print com nome e preço visíveis. A leitura acontece neste aparelho; precisa de internet para carregar o leitor.</p>
+            <label for="nome-print">Nome identificado — confira e ajuste</label>
+            <input id="nome-print" type="text">
+            <label for="preco-print">Preço identificado — escolha a variação correta</label>
+            <select id="preco-print"><option value="">Selecione após ler o print</option></select>
+            <button id="aplicar-print" type="button" disabled>Usar dados conferidos</button>
+            <p>Cole também seu link de afiliado abaixo e adicione as fotos separadamente.</p>
           </div>
 
           <div class="importador-texto">
@@ -228,7 +241,12 @@
               Escolher imagens do celular
             </button>
 
-            <textarea id="imagens" hidden></textarea>
+            <p class="ajuda-imagens">As fotos são compactadas e salvas junto do produto. Escolha até 4 fotos leves para manter o painel gratuito.</p>
+            <details class="importador-texto">
+              <summary>Usar links de imagens já hospedadas</summary>
+              <label for="imagens">Um endereço HTTPS por linha</label>
+              <textarea id="imagens"></textarea>
+            </details>
 
             <div
               id="previsualizacao-imagens"
