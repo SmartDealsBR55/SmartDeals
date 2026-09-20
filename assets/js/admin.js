@@ -9,6 +9,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  Timestamp,
   updateDoc
 } from "firebase/firestore";
 
@@ -889,6 +890,7 @@ async function enviarImagensSelecionadas() {
 
 function montarProduto() {
   const imagens = obterImagensDoFormulario();
+  const validade = obterDatasValidade();
 
   return {
     nome: obterValor("#nome"),
@@ -914,8 +916,47 @@ function montarProduto() {
     // Mantém compatibilidade com o site
     imagem: imagens[0] || "",
 
-    link: obterValor("#link")
+    link: obterValor("#link"),
+    expiraEm: validade.expiraEm,
+    excluirEm: validade.excluirEm
   };
+}
+
+function obterDatasValidade() {
+  const prazo = obterValor("#prazo-publicacao") || "30";
+  if (prazo === "0") return { expiraEm: null, excluirEm: null };
+
+  let vencimento;
+  if (prazo === "personalizado") {
+    const data = obterValor("#data-expiracao");
+    if (!data) return { expiraEm: null, excluirEm: null };
+    vencimento = new Date(`${data}T23:59:59`);
+  } else {
+    vencimento = new Date();
+    vencimento.setDate(vencimento.getDate() + Number(prazo));
+  }
+
+  const exclusao = new Date(vencimento);
+  exclusao.setDate(exclusao.getDate() + 7);
+  return {
+    expiraEm: Timestamp.fromDate(vencimento),
+    excluirEm: Timestamp.fromDate(exclusao)
+  };
+}
+
+function converterTimestampEmData(valor) {
+  if (!valor) return null;
+  if (typeof valor.toDate === "function") return valor.toDate();
+  if (valor.seconds) return new Date(valor.seconds * 1000);
+  const data = new Date(valor);
+  return Number.isNaN(data.getTime()) ? null : data;
+}
+
+function descricaoValidade(produto) {
+  const data = converterTimestampEmData(produto.expiraEm);
+  if (!data) return "Sem prazo";
+  const vencido = data.getTime() <= Date.now();
+  return `${vencido ? "Vencido" : "Válido até"} ${data.toLocaleDateString("pt-BR")}`;
 }
 
 function validarProduto(produto) {
@@ -1007,6 +1048,16 @@ function ativarModoEdicao(produto) {
   );
 
   definirValor("#link", produto.link);
+
+  const dataExpiracao = converterTimestampEmData(produto.expiraEm);
+  if (dataExpiracao) {
+    selecionarOpcao("#prazo-publicacao", "personalizado");
+    definirValor("#data-expiracao", dataExpiracao.toISOString().slice(0, 10));
+    obterElemento("#campo-data-expiracao").hidden = false;
+  } else {
+    selecionarOpcao("#prazo-publicacao", "0");
+    obterElemento("#campo-data-expiracao").hidden = true;
+  }
 
   const imagens = obterImagensProduto(produto);
 
@@ -1206,6 +1257,8 @@ function criarItemProduto(produto) {
             ${totalImagens}
             foto${totalImagens === 1 ? "" : "s"}
           </p>
+
+          <p class="validade-produto">${escaparHtml(descricaoValidade(produto))}</p>
         </div>
 
       </div>
@@ -1276,6 +1329,20 @@ async function carregarProdutos() {
         ...documento.data()
       })
     );
+
+    const agora = Date.now();
+    const paraExcluir = produtos.filter((produto) => {
+      const data = converterTimestampEmData(produto.excluirEm);
+      return data && data.getTime() <= agora;
+    });
+
+    if (paraExcluir.length) {
+      await Promise.all(
+        paraExcluir.map((produto) => deleteDoc(doc(db, "produtos", produto.id)))
+      );
+      const idsExcluidos = new Set(paraExcluir.map((produto) => produto.id));
+      produtos = produtos.filter((produto) => !idsExcluidos.has(produto.id));
+    }
 
     mostrarProdutos();
   } catch (erro) {
@@ -1503,6 +1570,12 @@ obterElemento("#nome")?.addEventListener("blur", () => {
   if (obterValor("#categoria")) return;
   const categoria = normalizarCategoriaImportada("", obterValor("#nome"));
   if (categoria) selecionarOpcao("#categoria", categoria);
+});
+
+obterElemento("#prazo-publicacao")?.addEventListener("change", (evento) => {
+  const personalizado = evento.target.value === "personalizado";
+  obterElemento("#campo-data-expiracao").hidden = !personalizado;
+  obterElemento("#data-expiracao").required = personalizado;
 });
 
 formulario.addEventListener(

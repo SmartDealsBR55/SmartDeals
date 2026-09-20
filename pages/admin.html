@@ -19,8 +19,8 @@
   <link rel="manifest" href="/SmartDeals/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/SmartDeals/assets/icons/smartdeals-192.png">
 
-  <script type="module" crossorigin src="../assets/admin-ja74_RGp.js"></script>
-  <link rel="modulepreload" crossorigin href="../assets/pwa-VP9vqmaN.js">
+  <script type="module" crossorigin src="../assets/admin-C1LHx28p.js"></script>
+  <link rel="modulepreload" crossorigin href="../assets/pwa-BgedIf7A.js">
   <link rel="stylesheet" crossorigin href="../assets/admin-CXzWSISI.css">
 </head>
 
@@ -177,6 +177,22 @@
               required
               placeholder="R$ 0,00"
             >
+          </label>
+
+          <label>
+            Prazo da oferta
+            <select id="prazo-publicacao">
+              <option value="30" selected>30 dias</option>
+              <option value="15">15 dias</option>
+              <option value="7">7 dias</option>
+              <option value="personalizado">Data personalizada</option>
+              <option value="0">Sem prazo</option>
+            </select>
+          </label>
+
+          <label id="campo-data-expiracao" hidden>
+            Data de vencimento
+            <input id="data-expiracao" type="date">
           </label>
 
           <div class="campo-completo campo-imagens">

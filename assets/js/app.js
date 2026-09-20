@@ -336,6 +336,17 @@ function formatarPreco(valor, textoPadrao = "") {
    CARREGAMENTO DO FIREBASE
 ========================= */
 
+function produtoAindaEstaAtivo(produto) {
+  const valor = produto.expiraEm;
+  if (!valor) return true;
+  const data = typeof valor.toDate === "function"
+    ? valor.toDate()
+    : valor.seconds
+      ? new Date(valor.seconds * 1000)
+      : new Date(valor);
+  return Number.isNaN(data.getTime()) || data.getTime() > Date.now();
+}
+
 async function carregarProdutos() {
   try {
     mensagemProdutos.hidden = false;
@@ -352,7 +363,7 @@ async function carregarProdutos() {
     produtos = resultado.docs.map((documento) => ({
       id: documento.id,
       ...documento.data()
-    }));
+    })).filter(produtoAindaEstaAtivo);
 
     aplicarFiltros(false);
   } catch (erro) {
