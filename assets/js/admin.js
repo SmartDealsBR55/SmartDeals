@@ -1630,4 +1630,76 @@ botaoAtualizarProdutos.addEventListener(
   carregarProdutos
 );
 
+function identificarLojaCompartilhada(url, texto = "") {
+  const referencia = `${url} ${texto}`.toLowerCase();
+
+  if (referencia.includes("shopee")) return "Shopee";
+  if (referencia.includes("amazon")) return "Amazon";
+  if (referencia.includes("mercadolivre") || referencia.includes("mercado livre") || referencia.includes("meli")) return "Mercado Livre";
+  if (referencia.includes("temu")) return "Temu";
+  if (referencia.includes("aliexpress")) return "AliExpress";
+  if (referencia.includes("magazineluiza") || referencia.includes("magalu")) return "Magazine Luiza";
+  return "";
+}
+
+function extrairNomeCompartilhado(title, text) {
+  const semLinks = `${title || ""}\n${text || ""}`
+    .replace(/https?:\/\/[^\s]+/gi, " ")
+    .replace(/R\$\s*\d{1,3}(?:\.\d{3})*(?:,\d{2})?|R\$\s*\d+(?:[.,]\d{2})?/gi, " ")
+    .replace(/(?:confira|olha\s+s[oó]|compre\s+agora|aproveite|veja)\s*(?:este|esse|esta|essa|aqui|na loja)?\s*/gi, " ")
+    .replace(/(?:link\s+de\s+afiliado|produto\s+na\s+shopee|na\s+shopee|shopee\s+brasil)/gi, " ")
+    .replace(/[|•]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s:–—-]+|[\s:–—-]+$/g, "")
+    .trim();
+
+  return nomeDeProdutoValido(semLinks).slice(0, 240);
+}
+
+function aproveitarCompartilhamento(dadosRecebidos = null) {
+  let dados = dadosRecebidos;
+
+  if (!dados) {
+    try {
+      dados = JSON.parse(sessionStorage.getItem("smartdeals:compartilhamento") || "null");
+    } catch {
+      sessionStorage.removeItem("smartdeals:compartilhamento");
+      return;
+    }
+  }
+
+  if (!dados) return;
+
+  const textoCompleto = `${dados.title || ""} ${dados.text || ""}`.trim();
+  const preco = textoCompleto.match(/R\$\s*\d{1,3}(?:\.\d{3})*(?:,\d{2})?|R\$\s*\d+(?:[.,]\d{2})?/i)?.[0] || "";
+  const nome = extrairNomeCompartilhado(dados.title, dados.text);
+  const loja = identificarLojaCompartilhada(dados.url, textoCompleto);
+
+  if (dados.url) preencherSeVazio("#link", dados.url);
+  if (nome) preencherSeVazio("#nome", nome);
+  if (loja && !obterValor("#loja")) selecionarOpcao("#loja", loja);
+  if (preco && !obterValor("#preco-atual")) campoPrecoAtual.value = formatarMoedaExistente(preco);
+
+  if (!obterValor("#categoria") && nome) {
+    const categoria = normalizarCategoriaImportada("", nome);
+    if (categoria) selecionarOpcao("#categoria", categoria);
+  }
+
+  const preenchidos = [nome && "nome", preco && "preço", loja && "loja"].filter(Boolean);
+  mostrarResultadoImportacao(
+    preenchidos.length
+      ? `Dados recebidos do celular: ${preenchidos.join(", ")}. Confira e complete o que faltar.`
+      : "Link recebido do celular. A loja não enviou os outros dados; complete o que faltar.",
+    preenchidos.length ? "sucesso" : "aviso"
+  );
+
+  sessionStorage.removeItem("smartdeals:compartilhamento");
+}
+
+window.addEventListener("smartdeals:compartilhamento-recebido", (evento) => {
+  aproveitarCompartilhamento(evento.detail);
+});
+
+aproveitarCompartilhamento();
+
 atualizarPrevisualizacaoImagens();

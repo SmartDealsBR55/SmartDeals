@@ -38,13 +38,37 @@ window.addEventListener("appinstalled", () => {
 });
 
 const parametros = new URLSearchParams(window.location.search);
-const compartilhado = [parametros.get("url"), parametros.get("text"), parametros.get("title")]
-  .filter(Boolean).join(" ").match(/https?:\/\/[^\s]+/i)?.[0] || "";
+const tituloCompartilhado = parametros.get("title") || "";
+const textoCompartilhado = parametros.get("text") || "";
+const urlCompartilhada = parametros.get("url") || "";
+const conteudoCompartilhado = [urlCompartilhada, textoCompartilhado, tituloCompartilhado]
+  .filter(Boolean).join(" ");
+const compartilhado = conteudoCompartilhado.match(/https?:\/\/[^\s]+/i)?.[0] || "";
 const campoLink = document.querySelector("#link");
 
-if (compartilhado && campoLink) {
-  campoLink.value = compartilhado;
-  campoLink.dispatchEvent(new Event("input", { bubbles: true }));
+if (conteudoCompartilhado) {
+  const dadosCompartilhados = {
+    title: tituloCompartilhado,
+    text: textoCompartilhado,
+    url: compartilhado || urlCompartilhada,
+    recebidoEm: Date.now()
+  };
+
+  sessionStorage.setItem(
+    "smartdeals:compartilhamento",
+    JSON.stringify(dadosCompartilhados)
+  );
+
+  if (compartilhado && campoLink) {
+    campoLink.value = compartilhado;
+    campoLink.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  window.dispatchEvent(new CustomEvent(
+    "smartdeals:compartilhamento-recebido",
+    { detail: dadosCompartilhados }
+  ));
+
   document.querySelector("#form-produto")?.scrollIntoView({ behavior: "smooth" });
   history.replaceState({}, "", window.location.pathname + window.location.hash);
 }
