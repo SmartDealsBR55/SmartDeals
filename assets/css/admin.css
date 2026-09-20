@@ -907,6 +907,23 @@ form > button:hover:not(:disabled),
   gap: 14px;
 }
 
+.importador-texto {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 24px;
+  min-width: 0;
+}
+.importador-texto button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px;
+  background: #efd16b;
+  color: #17140b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
 .campo-link-importador {
   min-width: 0;
 }

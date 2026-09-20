@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { analisarTextoOferta } from '../assets/js/texto-oferta.js';
+const r = analisarTextoOferta('Dê uma olhada em Corta Vento Masculina Impermeável Semi Forrada PRETO Rock Saints por R$60,16 - R$64,90. Compre na Shopee agora! https://s.shopee.com.br/8V95WMF65p');
+assert.equal(r.nome, 'Corta Vento Masculina Impermeável Semi Forrada PRETO Rock Saints');
+assert.equal(r.url, 'https://s.shopee.com.br/8V95WMF65p');
+assert.deepEqual(r.valores, [60.16, 64.90]);
+assert.equal(r.faixa, true);
+assert.deepEqual(analisarTextoOferta('Notebook por R$1234,56 https://example.com').valores, [1234.56]);
+assert.deepEqual(analisarTextoOferta('Notebook por R$1.234,56 https://example.com').valores, [1234.56]);
+assert.equal(analisarTextoOferta('https://s.shopee.com.br/teste').nome, '');
+assert.deepEqual(analisarTextoOferta('').valores, []);
+assert.equal(analisarTextoOferta('Confira Fone por R$60,16 https://example.com').faixa, false);
+console.log('8 verificações de texto aprovadas.');

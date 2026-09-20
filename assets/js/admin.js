@@ -1,4 +1,5 @@
 import { db, auth, storage } from "./firebase.js";
+import { analisarTextoOferta } from "./texto-oferta.js";
 
 import {
   addDoc,
@@ -391,7 +392,7 @@ const REGRAS_CATEGORIA_ADMIN = [
     "barbeador", "depilador", "unha", "esmalte", "cabelo"
   ]],
   ["Moda", [
-    "calcinha", "lingerie", "sutia", "biquini", "maio", "cueca",
+    "corta vento", "corta-vento", "jaqueta", "casaco", "calcinha", "lingerie", "sutia", "biquini", "maio", "cueca",
       "meia", "meias", "soquete", "meia soquete", "kit de meias", "short",
     "shorts", "bermuda", "calca", "jeans", "legging", "vestido", "saia",
     "camisa", "camiseta", "blusa", "pijama", "tenis", "chinelo", "sandalia",
@@ -1695,6 +1696,33 @@ function aproveitarCompartilhamento(dadosRecebidos = null) {
 
   sessionStorage.removeItem("smartdeals:compartilhamento");
 }
+
+obterElemento("#botao-preencher-texto")?.addEventListener("click", () => {
+  const texto = obterValor("#texto-oferta");
+  const dados = analisarTextoOferta(texto);
+  if (!dados.url) {
+    mostrarResultadoImportacao("Cole o texto completo, incluindo o link de afiliado.", "aviso");
+    return;
+  }
+  if (produtoEmEdicao) {
+    mostrarResultadoImportacao("Cancele a edição antes de importar outro produto.", "aviso");
+    return;
+  }
+  const temDados = ["#nome", "#preco-atual", "#imagens", "#link"].some(s => obterValor(s)) || arquivosImagensSelecionados.length;
+  if (temDados && !confirm("Substituir os dados e imagens do formulário pelo texto colado? Os produtos publicados não serão alterados.")) return;
+  limparDadosDaBuscaAnterior();
+  definirValor("#link", dados.url);
+  definirValor("#nome", nomeDeProdutoValido(dados.nome));
+  selecionarOpcao("#loja", identificarLojaCompartilhada(dados.url, texto));
+  selecionarOpcao("#categoria", normalizarCategoriaImportada("", dados.nome));
+  if (dados.valores.length === 1) {
+    campoPrecoAtual.value = dados.valores[0].toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+  linkDaUltimaBusca = dados.url;
+  mostrarResultadoImportacao(dados.faixa
+    ? "O texto contém mais de um preço. Confira a variação na loja e preencha o preço atual. Revise a categoria e adicione as fotos antes de publicar."
+    : "Texto lido! Confira nome, loja, categoria e preço. Adicione as fotos antes de publicar.", "aviso");
+});
 
 window.addEventListener("smartdeals:compartilhamento-recebido", (evento) => {
   aproveitarCompartilhamento(evento.detail);
