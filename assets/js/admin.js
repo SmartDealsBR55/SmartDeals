@@ -604,7 +604,23 @@ async function buscarInformacoesProduto() {
     return;
   }
 
-  if (linkDaUltimaBusca && link !== linkDaUltimaBusca) {
+  // Cada pesquisa precisa começar com os dados do novo anúncio. Quando o
+  // importador da loja retorna apenas parte das informações (algo comum na
+  // Shopee), os campos antigos não podem permanecer no formulário — eles
+  // acabam sendo usados na verificação de duplicidade.
+  const existeDadoDeOutroProduto = Boolean(
+    obterValor("#nome") ||
+    obterValor("#preco-atual") ||
+    obterValor("#categoria") ||
+    obterImagensDoFormulario().length ||
+    arquivosImagensSelecionados.length
+  );
+
+  if (
+    !produtoEmEdicao &&
+    link !== linkDaUltimaBusca &&
+    existeDadoDeOutroProduto
+  ) {
     limparDadosDaBuscaAnterior();
   }
   linkDaUltimaBusca = link;
@@ -1601,7 +1617,11 @@ previsualizacaoImagens?.addEventListener("click", (evento) => {
 });
 
 obterElemento("#link")?.addEventListener("input", () => {
-  if (linkDaUltimaBusca && obterValor("#link") !== linkDaUltimaBusca) {
+  if (
+    !produtoEmEdicao &&
+    linkDaUltimaBusca &&
+    obterValor("#link") !== linkDaUltimaBusca
+  ) {
     limparDadosDaBuscaAnterior();
     linkDaUltimaBusca = "";
   }
