@@ -1223,3 +1223,9 @@ form > button:hover:not(:disabled),
   .admin-product-acoes { grid-template-columns: 1fr; }
   .admin-product-imagem { aspect-ratio: 16 / 8; }
 }
+
+/* Cadastro acessível no celular */
+[hidden] { display: none !important; }
+.login-card button { min-height: 48px; width: 100%; margin-top: 12px; }
+.login-card input { font-size: 16px; }
+#conta-atual { overflow-wrap: anywhere; padding: 8px 16px; }

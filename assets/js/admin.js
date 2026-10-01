@@ -7,6 +7,8 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  getDoc,
+  where,
   orderBy,
   query,
   serverTimestamp,
@@ -15,7 +17,8 @@ import {
 } from "firebase/firestore";
 
 import {
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "firebase/auth";
 
 import {
@@ -95,6 +98,8 @@ const URL_IMPORTADOR_PRODUTOS =
   "https://smartdeals-importador.gabriel-d-blaut.workers.dev";
 
 let produtos = [];
+let administrador = false;
+let acessoPronto = false;
 let produtoEmEdicao = null;
 let linkDaUltimaBusca = "";
 let arquivosImagensSelecionados = [];
@@ -129,13 +134,24 @@ function nomeDeProdutoValido(nome) {
    AUTENTICAÇÃO
 ========================= */
 
-onAuthStateChanged(auth, (usuario) => {
+onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) {
     window.location.href = new URL("./login.html", window.location.href).href;
     return;
   }
 
-  carregarProdutos();
+  try {
+    const permissao = await getDoc(doc(db, "administradores", usuario.uid));
+    administrador = permissao.exists() && permissao.data().ativo === true;
+    acessoPronto = true;
+    document.querySelector("#conta-atual").textContent = `${usuario.displayName || usuario.email} · ${administrador ? "Administrador" : "Afiliado"}`;
+    await carregarProdutos();
+  } catch {
+    mostrarMensagem("Não foi possível verificar seu acesso. O administrador precisa ativar as regras de acesso para afiliados.");
+  }
+});
+document.querySelector("#sair-conta")?.addEventListener("click", async () => {
+  try { await signOut(auth); } catch { mostrarMensagem("Não foi possível sair. Tente novamente."); }
 });
 
 /* =========================
@@ -1023,8 +1039,8 @@ function validarProduto(produto) {
     return false;
   }
 
-  if (!produto.link) {
-    mostrarMensagem("Digite o link de afiliado.");
+  if (!/^https:\/\//i.test(produto.link)) {
+    mostrarMensagem("Digite um link de afiliado começando com https://.");
     return false;
   }
 
@@ -1035,9 +1051,9 @@ function normalizarLinkParaComparacao(valor) {
   try {
     const url = new URL(String(valor || "").trim());
     url.hash = "";
-    return url.toString().replace(/\/$/, "").toLowerCase();
+    return url.toString().replace(/\/$/, "");
   } catch {
-    return String(valor || "").trim().replace(/\/$/, "").toLowerCase();
+    return String(valor || "").trim().replace(/\/$/, "");
   }
 }
 
@@ -1046,14 +1062,13 @@ function encontrarProdutoDuplicado(produto) {
   const nome = normalizarTextoCategoria(produto.nome);
   const loja = normalizarTextoCategoria(produto.loja);
 
-  return produtos.find((existente) => {
-    if (existente.id === produtoEmEdicao?.id) return false;
-    const mesmoLink = link && normalizarLinkParaComparacao(existente.link) === link;
-    const mesmoProduto = nome
-      && normalizarTextoCategoria(existente.nome) === nome
-      && normalizarTextoCategoria(existente.loja) === loja;
-    return mesmoLink || mesmoProduto;
-  });
+  const candidatos = produtos.filter((existente) => existente.id !== produtoEmEdicao?.id);
+  const porLink = candidatos.find((existente) => link && normalizarLinkParaComparacao(existente.link) === link);
+  if (porLink) return { produto: porLink, motivo: "link" };
+  const porNome = candidatos.find((existente) => nome
+    && normalizarTextoCategoria(existente.nome) === nome
+    && normalizarTextoCategoria(existente.loja) === loja);
+  return porNome ? { produto: porNome, motivo: "nome" } : null;
 }
 
 /* =========================
@@ -1173,6 +1188,7 @@ async function publicarProduto(produto) {
     collection(db, "produtos"),
     {
       ...produto,
+      ownerId: auth.currentUser.uid,
       criadoEm: serverTimestamp(),
       atualizadoEm: serverTimestamp()
     }
@@ -1191,6 +1207,7 @@ async function atualizarProduto(id, produto) {
 
 async function salvarProduto(evento) {
   evento.preventDefault();
+  if (!acessoPronto || !auth.currentUser) { mostrarMensagem("Aguarde a verificação do seu acesso."); return; }
 
   esconderMensagem();
 
@@ -1201,10 +1218,13 @@ async function salvarProduto(evento) {
   }
 
   const duplicado = encontrarProdutoDuplicado(produto);
-  if (duplicado) {
-    mostrarMensagem(`Esse produto já está cadastrado: ${duplicado.nome}`);
-    duplicado.id && document.querySelector(`[data-id="${duplicado.id}"]`)?.scrollIntoView({ behavior: "smooth" });
+  if (duplicado?.motivo === "link") {
+    mostrarMensagem(`Este link já está salvo no cadastro “${duplicado.produto.nome}”. Confira o campo Link de afiliado e o link desse cadastro. Se o cadastro antigo tem o link errado, edite-o antes de publicar. Link encontrado: ${duplicado.produto.link}`);
     return;
+  }
+  if (duplicado?.motivo === "nome") {
+    const continuar = confirm(`Já existe um produto com o nome “${duplicado.produto.nome}” na mesma loja, mas o link é diferente. Confira se o nome pertence ao novo anúncio. Deseja publicar como outro produto?`);
+    if (!continuar) return;
   }
 
   const estaEditando = Boolean(produtoEmEdicao);
@@ -1292,7 +1312,7 @@ function criarItemProduto(produto) {
             imagemPrincipal
               ? `
                 <img
-                  src="${imagemPrincipal}"
+                  src="${escaparHtml(imagemPrincipal)}"
                   alt="${nome}"
                   loading="lazy"
                 >
@@ -1324,7 +1344,7 @@ function criarItemProduto(produto) {
 
         <button
           type="button"
-          data-id="${produto.id}"
+          data-id="${escaparHtml(produto.id)}"
           class="botao-editar"
         >
           Editar
@@ -1332,7 +1352,7 @@ function criarItemProduto(produto) {
 
         <button
           type="button"
-          data-id="${produto.id}"
+          data-id="${escaparHtml(produto.id)}"
           class="botao-excluir"
         >
           Excluir
@@ -1373,10 +1393,10 @@ async function carregarProdutos() {
       </p>
     `;
 
-    const consulta = query(
-      collection(db, "produtos"),
-      orderBy("criadoEm", "desc")
-    );
+    if (!acessoPronto || !auth.currentUser) return;
+    const consulta = administrador
+      ? query(collection(db, "produtos"), orderBy("criadoEm", "desc"))
+      : query(collection(db, "produtos"), where("ownerId", "==", auth.currentUser.uid));
 
     const resultado = await getDocs(consulta);
 
@@ -1387,6 +1407,7 @@ async function carregarProdutos() {
       })
     );
 
+    produtos.sort((a, b) => (b.criadoEm?.seconds || 0) - (a.criadoEm?.seconds || 0));
     const agora = Date.now();
     const paraExcluir = produtos.filter((produto) => {
       const data = converterTimestampEmData(produto.excluirEm);

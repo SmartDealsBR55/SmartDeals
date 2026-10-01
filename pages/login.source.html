@@ -10,7 +10,7 @@
 
   <meta name="robots" content="noindex, nofollow">
 
-  <title>Login Administrativo | SmartDeals</title>
+  <title>Área dos Afiliados | SmartDeals</title>
 
   <meta name="theme-color" content="#0b0a07">
   <link rel="manifest" href="/SmartDeals/manifest.webmanifest">
@@ -26,10 +26,13 @@
     <section class="login-card">
       <div class="login-logo">
         <h1>SmartDeals</h1>
-        <p>Acesso administrativo</p>
+        <p id="titulo-acesso">Área dos afiliados</p>
       </div>
 
       <form id="form-login">
+        <label id="campo-nome" hidden>Seu nome
+          <input id="nome-conta" autocomplete="name" maxlength="80" placeholder="Como você quer ser chamado">
+        </label>
         <label>
           E-mail
           <input
@@ -56,7 +59,10 @@
           Entrar no painel
         </button>
 
-        <p id="mensagem-login" hidden></p>
+        <p id="mensagem-login" role="status" aria-live="polite" hidden></p>
+        <button id="alternar-cadastro" type="button">Sou afiliado — criar conta</button>
+        <button id="recuperar-senha" type="button">Esqueci minha senha</button>
+        <p>Publique ofertas com seus links de afiliado. Você é responsável pelos dados e imagens que cadastrar. <a href="politica.html">Privacidade</a></p>
       </form>
 
       <a class="voltar-site" href="../index.html">

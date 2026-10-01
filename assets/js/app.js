@@ -545,13 +545,13 @@ function criarCardProduto(produto) {
   );
 
   const link = escaparHtml(
-    valorSeguro(produto.link, "#")
+    (/^https:\/\//i.test(produto.link || "") ? produto.link : "#")
   );
 
   return `
     <article
       class="product-card"
-      data-product-id="${produto.id}"
+      data-product-id="${escaparHtml(produto.id)}"
     >
       <div
         class="product-image product-carousel"
