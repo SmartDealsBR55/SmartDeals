@@ -1229,3 +1229,10 @@ form > button:hover:not(:disabled),
 .login-card button { min-height: 48px; width: 100%; margin-top: 12px; }
 .login-card input { font-size: 16px; }
 #conta-atual { overflow-wrap: anywhere; padding: 8px 16px; }
+\n
+.afiliado-saldo{display:grid;gap:12px}
+.selo-promocao{margin:0;color:var(--cor-dourada-clara);font-weight:800}
+.planos-promocionais{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.planos-promocionais article{display:grid;gap:5px;padding:12px;border:1px solid rgba(232,190,72,.3);border-radius:12px}
+.planos-promocionais span{color:var(--cor-dourada-clara);font-weight:800}
+@media(max-width:620px){.planos-promocionais{grid-template-columns:1fr}}

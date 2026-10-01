@@ -1921,3 +1921,7 @@ body.header-search-visible .header-scroll-search {
   .buying-guide-grid { grid-template-columns: 1fr; }
   .buying-guide { padding-bottom: 55px; }
 }
+\n
+.afiliado-chamada{display:grid;gap:6px;max-width:520px;margin-top:22px;padding:16px 18px;border:1px solid rgba(232,190,72,.35);border-radius:14px;background:rgba(232,190,72,.08)}
+.afiliado-chamada span{color:var(--cor-cinza)}
+.afiliado-chamada a{color:var(--cor-dourada-clara);font-weight:700}
