@@ -19,9 +19,7 @@
   <link rel="manifest" href="/SmartDeals/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/SmartDeals/assets/icons/smartdeals-192.png">
 
-  <script type="module" crossorigin src="../assets/admin-l9e1fHQe.js"></script>
-  <link rel="modulepreload" crossorigin href="../assets/pwa-Bdf9u9Bc.js">
-  <link rel="stylesheet" crossorigin href="../assets/admin-DmnIXVTu.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 
 <body>
@@ -42,6 +40,18 @@
   <div style="text-align:center;font-size:12px;padding:8px">Painel v11 · área dos afiliados</div>
   <p id="conta-atual" style="text-align:center" aria-live="polite">Verificando acesso...</p>
   <main class="admin-container">
+
+    <section class="admin-card afiliado-saldo">
+      <p class="selo-promocao">PROMOÇÃO DE LANÇAMENTO</p>
+      <h2>5 anúncios grátis no cadastro</h2>
+      <p>Depois, escolha um pacote promocional:</p>
+      <div class="planos-promocionais">
+        <article><strong>15 anúncios</strong><span>R$ 4,90</span></article>
+        <article><strong>40 anúncios</strong><span>R$ 12,90</span></article>
+        <article><strong>130 anúncios</strong><span>R$ 29,90</span></article>
+      </div>
+      <p>O pagamento automático está em homologação.</p>
+    </section>
 
     <section class="admin-card">
 
@@ -457,7 +467,13 @@
 
   </main>
 
+  <script
+    type="module"
+    src="../assets/js/admin.js"
+  ></script>
 
+  <script type="module" src="../assets/js/pwa.js"></script>
+  <script type="module" src="../assets/js/leitor-print.js"></script>
 
 </body>
 </html>
