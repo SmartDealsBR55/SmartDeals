@@ -28,6 +28,22 @@ service cloud.firestore {
         && (d.excluirEm == null || d.excluirEm is timestamp)
         && d.atualizadoEm == request.time;
     }
+    function debitFor(id) {
+      let before = get(/databases/$(database)/documents/carteiras/$(request.auth.uid)).data;
+      let after = getAfter(/databases/$(database)/documents/carteiras/$(request.auth.uid)).data;
+      return before.saldo >= 1 && after.saldo == before.saldo - 1 && after.ultimoProduto == id;
+    }
+    match /carteiras/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, create, delete: if false;
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['saldo','ultimoProduto'])
+        && request.resource.data.saldo is int && resource.data.saldo >= 1
+        && request.resource.data.saldo == resource.data.saldo - 1
+        && request.resource.data.ultimoProduto is string
+        && !exists(/databases/$(database)/documents/produtos/$(request.resource.data.ultimoProduto))
+        && getAfter(/databases/$(database)/documents/produtos/$(request.resource.data.ultimoProduto)).data.ownerId == uid;
+    }
     match /administradores/{uid} {
       // Criar administradores somente no console Firebase ou Admin SDK.
       allow get: if signedIn() && request.auth.uid == uid;
@@ -37,7 +53,8 @@ service cloud.firestore {
       allow read: if true;
       allow create: if signedIn() && validProduct()
         && request.resource.data.ownerId == request.auth.uid
-        && request.resource.data.criadoEm == request.time;
+        && request.resource.data.criadoEm == request.time
+        && (admin() || debitFor(id));
       allow update: if (admin() || owner())
         && (admin() || validProduct())
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['ownerId', 'criadoEm']);

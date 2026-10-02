@@ -1,0 +1,17 @@
+{
+ "name":"smartdeals-pagamentos",
+ "main":"src/index.js",
+ "compatibility_date":"2026-10-01",
+ "workers_dev":true,
+ "preview_urls":false,
+ "keep_vars":true,
+ "observability":{"enabled":true,"logs":{"enabled":true}},
+ "vars":{
+  "FIREBASE_PROJECT_ID":"smartdeals-e942e",
+  "FIREBASE_API_KEY":"AIzaSyD36Kls8EAxX_eFxsexuo4pWR9AdyqiZo0",
+  "SITE_URL":"https://smartdealsbr55.github.io/SmartDeals",
+  "WORKER_URL":"https://smartdeals-pagamentos.gabriel-d-blaut.workers.dev",
+  "PAYMENTS_ENABLED":"false",
+  "MP_COLLECTOR_ID":""
+ }
+}

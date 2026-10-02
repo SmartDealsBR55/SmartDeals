@@ -6,7 +6,7 @@ const button = form.querySelector('[type=submit]');
 const toggle = document.querySelector('#alternar-cadastro');
 let cadastro = new URLSearchParams(location.search).has('cadastro');
 let ocupado = false;
-const go = () => location.assign(new URL('./admin.html', location.href));
+const go = () => { const next = new URL('./admin.html', location.href); const plan = new URLSearchParams(location.search).get('plano'); if (['p10','p25','p50','p100'].includes(plan)) next.searchParams.set('plano', plan); location.assign(next); };
 function show(text) { message.hidden = false; message.textContent = text; }
 function render() {
  document.querySelector('#campo-nome').hidden = !cadastro;

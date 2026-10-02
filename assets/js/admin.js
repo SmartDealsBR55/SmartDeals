@@ -1,8 +1,10 @@
 import { db, auth, storage } from "./firebase.js";
+import { iniciarCreditos, atualizarSaldo } from "./creditos.js";
 import { analisarTextoOferta } from "./texto-oferta.js";
 
 import {
   addDoc,
+  runTransaction,
   collection,
   deleteDoc,
   doc,
@@ -145,6 +147,7 @@ onAuthStateChanged(auth, async (usuario) => {
     administrador = permissao.exists() && permissao.data().ativo === true;
     acessoPronto = true;
     document.querySelector("#conta-atual").textContent = `${usuario.displayName || usuario.email} · ${administrador ? "Administrador" : "Afiliado"}`;
+    iniciarCreditos(administrador);
     await carregarProdutos();
   } catch {
     mostrarMensagem("Não foi possível verificar seu acesso. O administrador precisa ativar as regras de acesso para afiliados.");
@@ -1184,15 +1187,21 @@ function cancelarEdicao() {
 }
 
 async function publicarProduto(produto) {
-  await addDoc(
-    collection(db, "produtos"),
-    {
-      ...produto,
-      ownerId: auth.currentUser.uid,
-      criadoEm: serverTimestamp(),
-      atualizadoEm: serverTimestamp()
+  const novo = doc(collection(db, "produtos"));
+  const dados = {...produto, ownerId: auth.currentUser.uid,
+    criadoEm: serverTimestamp(), atualizadoEm: serverTimestamp()};
+  const carteira = doc(db, "carteiras", auth.currentUser.uid);
+  await runTransaction(db, async transaction => {
+    if (!administrador) {
+      const saldo = await transaction.get(carteira);
+      if (!saldo.exists() || saldo.data().saldo < 1) {
+        throw new Error("Você não possui créditos. Escolha um pacote para publicar.");
+      }
+      transaction.update(carteira, {saldo: saldo.data().saldo - 1, ultimoProduto: novo.id});
     }
-  );
+    transaction.set(novo, dados);
+  });
+  atualizarSaldo();
 }
 
 async function atualizarProduto(id, produto) {
