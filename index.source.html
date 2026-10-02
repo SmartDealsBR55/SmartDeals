@@ -29,6 +29,142 @@
   <link rel="apple-touch-icon" href="/SmartDeals/assets/icons/smartdeals-192.png">
 
   <link rel="stylesheet" href="assets/css/style.css">
+<style id="sd-visual-v2">
+.sd-offer {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  width: min(1100px, calc(100% - 36px));
+  margin: 32px auto;
+  padding: 32px;
+  border: 1px solid #61522f;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at top left, #423619 0, transparent 60%),
+    #131410;
+  box-shadow: 0 20px 50px #0004;
+  color: #f5f2e8;
+  font-family: Arial, sans-serif;
+}
+.sd-offer * { box-sizing: border-box; }
+.sd-offer .sd-label {
+  display: block;
+  margin: 0 0 16px;
+  color: #d9bd73;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  line-height: 1.6;
+}
+.sd-offer h2 {
+  margin: 0 0 16px;
+  font-size: clamp(26px, 4vw, 42px);
+  line-height: 1.12;
+  letter-spacing: -1px;
+}
+.sd-offer h2:after { display: none; }
+.sd-offer h2 em { color: #e5c977; font-style: normal; }
+.sd-offer p {
+  display: block;
+  margin: 0 0 20px;
+  color: #ccc9bd;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.sd-offer .sd-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: fit-content;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #d8b442, #f2dd93);
+  color: #211b0d;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+.sd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.sd-plan {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid #ffffff20;
+  border-radius: 14px;
+  background: #ffffff06;
+}
+.sd-plan > span { font-size: 13px; color: #dedbd2; }
+.sd-plan > strong { font-size: 25px; line-height: 1.2; color: #fff; }
+.sd-plan > small { font-size: 12px; color: #e5c977; }
+.sd-offer .sd-note { font-size: 12px; margin: 14px 0 0; }
+.sd-offer .sd-status {
+  font-size: 12px;
+  color: #a7a497;
+  margin: 10px 0 0;
+}
+.login-page .login-container {
+  width: min(920px, 100%);
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+.login-page .login-card {
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: 28px 22px;
+}
+.login-page #form-login > button:not([type=submit]) {
+  background: transparent;
+  border: 1px solid #6d6040;
+  color: #ead59d;
+  box-shadow: none;
+  min-height: 44px;
+  margin-top: 8px;
+}
+.login-page #recuperar-senha {
+  border: 0 !important;
+  text-decoration: underline;
+}
+.login-page #form-login input {
+  font-size: 16px;
+  min-height: 48px;
+}
+.login-page .sd-offer {
+  grid-template-columns: 1fr;
+  width: 100%;
+  margin: 24px 0 0;
+  padding: 22px;
+  gap: 16px;
+}
+.login-page .sd-offer h2 { font-size: 25px; }
+.login-page .sd-cta { display: none; }
+.login-page .sd-plan { padding: 14px; }
+.login-page .sd-plan > strong { font-size: 23px; }
+.admin-container > .sd-offer {
+  grid-template-columns: 1fr;
+  width: 100%;
+  margin: 0 0 24px;
+}
+.admin-container > .sd-offer .sd-intro { display: none; }
+@media (max-width: 700px) {
+  .sd-offer {
+    grid-template-columns: 1fr;
+    padding: 24px;
+    gap: 24px;
+    margin: 24px auto;
+  }
+  .sd-offer .sd-cta { width: 100%; }
+  .sd-offer h2 { font-size: 32px; }
+  .sd-plan { padding: 14px; }
+  .sd-plan > strong { font-size: 24px; }
+}
+</style>
 </head>
 
 <body>
@@ -95,12 +231,35 @@
       </div>
 
       <a href="#achados">Ofertas</a>
-      <a href="pages/login.html?cadastro=1">Sou afiliado</a>
+      <a href="pages/login.html">Sou afiliado</a>
     </nav>
 
   </header>
 
   <main>
+
+<section class="sd-offer" aria-label="Programa de afiliados">
+  <div class="sd-intro">
+    <span class="sd-label">SMARTDEALS / AFILIADOS</span>
+    <h2>Suas ofertas.<br><em>Mais oportunidades.</em></h2>
+    <p>Comece com 5 anúncios grátis no cadastro.</p>
+    <a class="sd-cta" href="pages/login.html">
+      Entrar ou criar conta <span>→</span>
+    </a>
+  </div>
+  <div class="sd-price">
+    <p class="sd-label">R$ 0,20 POR ANÚNCIO PAGO</p>
+    <div class="sd-grid"><article class="sd-plan"><span>10 anúncios</span><strong>R$ 2,00</strong><small>+ 5 de bônus</small></article><article class="sd-plan"><span>25 anúncios</span><strong>R$ 5,00</strong><small>+ 10 de bônus</small></article><article class="sd-plan"><span>50 anúncios</span><strong>R$ 10,00</strong><small>+ 20 de bônus</small></article><article class="sd-plan"><span>100 anúncios</span><strong>R$ 20,00</strong><small>+ 50 de bônus</small></article></div>
+    <p class="sd-note">
+      Bônus nas 3 primeiras recargas aprovadas por conta.
+      A partir da 4ª, vale a quantidade comprada.
+    </p>
+    <p class="sd-status">
+      Em breve: compra de créditos. Pagamentos ainda indisponíveis.
+    </p>
+  </div>
+</section>
+
 
     <!-- HERO -->
 
@@ -122,11 +281,7 @@
           produtos com bons preços em poucos segundos.
         </p>
 
-        <div class="afiliado-chamada">
-          <strong>Quer divulgar suas próprias ofertas?</strong>
-          <span>Cadastre-se e ganhe 5 anúncios grátis.</span>
-          <a href="pages/login.html?cadastro=1">Criar conta de afiliado</a>
-        </div>
+        
 
         <div class="hero-search">
 

@@ -18,7 +18,7 @@ function render() {
  document.querySelector('#titulo-acesso').textContent = cadastro ? 'Cadastre-se para publicar suas ofertas' : 'Área dos afiliados';
 }
 render();
-onAuthStateChanged(auth, user => { if (user && !ocupado) go(); });
+
 toggle.addEventListener('click', () => { cadastro = !cadastro; render(); message.hidden = true; });
 form.addEventListener('submit', async e => {
  e.preventDefault(); if (ocupado) return;
